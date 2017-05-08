@@ -72,17 +72,14 @@ var COLORS_FOR_SURVEY = new Array('20,130,200','232,95,51','34,205,33','210,211,
 
            // chartjs
 
-               if($type == 'Bar' || $type == 'Radar' || $type == 'Line' )
-               {
-
-                   init_chart_js_graph_with_datasets($type,$qid);
-               }
-               else
-               {
-                   init_chart_js_graph_with_datas($type, $qid);
-               }
-
-
+           if($type == 'Bar' || $type == 'Radar' || $type == 'Line' )
+           {
+               init_chart_js_graph_with_datasets($type,$qid);
+           }
+           else
+           {
+               init_chart_js_graph_with_datas($type, $qid);
+           }
        });
        return this;
     };
@@ -97,9 +94,15 @@ function init_chart_js_graph_with_datasets($type,$qid)
     var canvasId  = 'chartjs-'+$qid;
     var $canvas   = document.getElementById(canvasId).getContext("2d");
     var $canva    = $('#'+canvasId);
-    var $labels   = eval("labels_"+$qid);
-    var $grawdata = eval("grawdata_"+$qid);
+    var $statistics = statisticsData['quid'+$qid];
+    if($statistics == undefined) return;
+    var $labels   = $statistics.labels
+    var $grawdata = $statistics.grawdata
     var $color    = $canva.data('color');
+
+    $('#legend-no-percent-'+$qid).show();
+    $('#legend-percent-'+$qid).hide();
+    $('#stat-no-answer-'+$qid).hide();
 
     if (typeof chartjs != "undefined") {
         if (typeof chartjs[$qid] != "undefined") {
@@ -137,17 +140,23 @@ function init_chart_js_graph_with_datasets($type,$qid)
 }
 
 /**
- * This function load the graphs needing datas (pie chart, etc)
+ * This function load the graphs needing datas (pie chart, polar, Doughnut)
  */
 function init_chart_js_graph_with_datas($type,$qid)
 {
-    var canvasId = 'chartjs-'+$qid;
-    var $canvas = document.getElementById(canvasId).getContext("2d");
-    var $canva = $('#'+canvasId);
-    var $color = $canva.data('color');
-    var $labels = eval("labels_"+$qid);
-    var $grawdata = eval("grawdata_"+$qid);
+    var canvasId  = 'chartjs-'+$qid;
+    var $canvas   = document.getElementById(canvasId).getContext("2d");
+    var $canva    = $('#'+canvasId);
+    var $color    = $canva.data('color');
+    var $statistics = statisticsData['quid'+$qid];
+    if($statistics == undefined) return;
+    var $labels   = $statistics.labels
+    var $grawdata = $statistics.grawdata
     var $chartDef = new Array();
+
+    $('#legend-no-percent-'+$qid).hide();
+    $('#legend-percent-'+$qid).show();
+    $('#stat-no-answer-'+$qid).show();
 
     $.each($labels, function($i, $label) {
         $colori = (parseInt($i)+$color);
@@ -159,19 +168,52 @@ function init_chart_js_graph_with_datas($type,$qid)
         };
     });
 
+    var $options = {
+        tooltipTemplate: "<%if (label){%><%=label %>: <%}%><%= value + '%' %>",
+    };
+
     if (typeof chartjs != "undefined") {
         if (typeof chartjs[$qid] != "undefined") {
             window.chartjs[$qid].destroy();
         }
     }
 
-    console.log($type);
     window.chartjs[$qid] = new Chart($canvas)[$type](
-        $chartDef
+        $chartDef,
+        $options
     );
 }
 
-$(document).ready(function() {
+var onDocumentReady =  function(){
+
+    if ($('#completionstateSimpleStat').length>0)
+    {
+        $actionUrl = $('#completionstateSimpleStat').data('grid-display-url');
+
+        $(document).on("change", '#completionstate', function(){
+            $that = $(this);
+            $actionUrl = $(this).data('url');
+            $display = $that.val();
+            $postDatas  = {state:$display};
+
+            $.ajax({
+                url : $actionUrl,
+                type : 'POST',
+                data :  $postDatas,
+
+                // html contains the buttons
+                success : function(html, statut){
+                    // Reload page
+                    location.reload();
+                },
+                error :  function(html, statut){
+                    console.log('error');
+                    console.log(html);
+                }
+            });
+
+        });        
+    }
 
     if($('.chartjs-container').length>0)
     {
@@ -216,13 +258,14 @@ $(document).ready(function() {
     });
 
     // If the graph are displayed
-    if($('.chartjs-container').length>1){
+    if($('.chartjs-container').length>0){
 
         // On scroll, display the graph
         $('.chartjs-container').loadGraphOnScroll();
 
         // Buttons changing the graph type
         $('.chart-type-control').click(function() {
+
             $type = $(this).data('type');
             $qid = $(this).data('qid');
 
@@ -522,7 +565,10 @@ $(document).ready(function() {
      {
         changeGraphType('showpie', this.parentNode);
      });
-});
+};
+$(document).ready(onDocumentReady);
+$(document).on('triggerReady', onDocumentReady);
+
 
 var isWaiting = {};
 
@@ -686,3 +732,73 @@ function changeGraphType (cmd, id) {
     });
 
 }
+
+
+var createPDFworker = function(tableArray){
+    "use strict";
+    return new Promise(function(res,rej){
+        var createPDF = new CreatePDF();
+        
+        $.each(tableArray, function(i,table){
+            var sizes = {h: $(table).height(), w: $(table).width()};
+            var answerObject = createPDF('sendImg', {html: table, sizes: sizes});
+        });
+        
+        createPDF('getParseHtmlPromise').then(function(resolve){
+            var answerObject = createPDF('exportPdf');
+            var newWindow = window.open(answerObject.msg,600,800);
+            res('done');
+        }, function(reject){
+            rej(arguments);
+        });
+    });
+};
+
+$(document).ready(function(){
+    $('body').addClass('onStatistics');
+
+    $('body').on('click','.action_js_export_to_pdf', function(){
+
+        // var thisTable = $('#'+$(this).data('questionId'));
+        // domtoimage.toPng(thisTable[0]).then(
+        //     function(image){
+        //         $('body').prepend($('<img/>').attr('src',image));
+        //     }
+        // )
+        
+        // var thisTable = $('#'+$(this).data('questionId'));
+        // console.log(thisTable.html());    
+        
+        var $self = $(this),
+            overlay = $('<div></div>')
+            .attr('id','overlay')
+            .css({
+                position: 'fixed', 
+                width: "100%", 
+                height:"100%", 
+                top:0,
+                "z-index" : 5000,
+                "pointer-events": 'none',
+                left:0,
+                right:0,
+                bottom:0, 
+                "background-color": "hsla(0,0%,65%,0.6)"
+            });
+        $('#statsContainerLoading').clone().css({display: 'block',position: 'fixed', top:"25%",left:0, width: "100%"}).appendTo(overlay);
+        overlay.appendTo('body');
+
+        var thisTable = $('#'+$self.data('questionId'));
+        $self.css({display:'none'});
+        thisTable.find('.chartjs-buttons').closest('tr').css({display:'none'});
+        createPDFworker.call(null,thisTable).then(
+            function(success){
+                overlay.remove(); 
+                thisTable.find('.chartjs-buttons').closest('tr').css({display:''});
+                $self.css({display:''});
+            },
+            function(){console.log(arguments);}
+        )
+
+
+    });
+});

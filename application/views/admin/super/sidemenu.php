@@ -146,10 +146,10 @@
                                             <li class="disabled">
                                                 <a href='#'>
                                                     <span class="icon-organize"></span>
-                                                <span class="btntooltip" data-toggle="tooltip" data-placement="bottom" title="<?php echo gT("Question group/question organizer disabled").' - '.gT("This survey is currently active."); ?>">
-                                                    <?php eT("Question organizer"); ?>
+                                                    <span class="btntooltip" data-toggle="tooltip" data-placement="bottom" title="<?php echo gT("Question group/question organizer disabled").' - '.gT("This survey is currently active."); ?>">
+                                                        <?php eT("Question organizer"); ?>
+                                                    </span>
                                                 </a>
-                                                </span>
                                             </li>
                                         <?php else: ?>
                                             <li>
@@ -170,7 +170,7 @@
                         <li id="tokensidemenu" class="toWhite  <?php if( isset($sidemenu["token_menu"]) ) echo 'active'; ?> ">
                             <a href="<?php echo $this->createUrl("admin/tokens/sa/index/surveyid/$surveyid"); ?>">
                                 <span class="glyphicon glyphicon-user"></span>
-                                <?php eT("Token management");?>
+                                <?php eT("Survey participants");?>
                             </a>
                         </li>
                     <?php endif; ?>

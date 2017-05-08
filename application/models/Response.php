@@ -1,12 +1,12 @@
 <?php
 
-	/**
-	 * Relations
-	 * @property Token $token
-	 * @property Survey $survey
-	 */
-	abstract class Response extends Dynamic
-	{
+    /**
+     * Relations
+     * @property Token $token
+     * @property Survey $survey
+     */
+    abstract class Response extends Dynamic
+    {
 
         public function beforeDelete() {
             if (parent::beforeDelete())
@@ -18,33 +18,39 @@
         }
 
         /**
-		 *
-		 * @param mixed $className Either the classname or the survey id.
-		 * @return Response
-		 */
-		public static function model($className = null) {
-			return parent::model($className);
-		}
-
-		/**
-		 *
-		 * @param int $surveyId
-		 * @param string $scenario
-		 * @return Response Description
-		 */
-		public static function create($surveyId, $scenario = 'insert') {
-			return parent::create($surveyId, $scenario);
-		}
-
-		/**
-         * Delete all files related to this repsonse.
+         *
+         * @param mixed $className Either the classname or the survey id.
+         * @return Response
          */
-        public function getFiles()
-        {
+        public static function model($className = null) {
+            return parent::model($className);
+        }
 
-            $questions = Question::model()->findAllByAttributes(array('sid' => $this->dynamicId,'type' => '|','language'=>getBaseLanguageFromSurveyID($this->dynamicId)));
+        /**
+         *
+         * @param int $surveyId
+         * @param string $scenario
+         * @return Response Description
+         */
+        public static function create($surveyId, $scenario = 'insert') {
+            return parent::create($surveyId, $scenario);
+        }
+
+        /**
+        * Get all files related to this response and (optionally) question ID.
+        * 
+        * @param string $sQID The question ID - optional - Default 0
+        */
+        public function getFiles($sQID=0)
+        {
+            $aConditions=array('sid' => $this->dynamicId,'type' => '|','language'=>getBaseLanguageFromSurveyID($this->dynamicId));
+            if ($sQID>0)
+            {
+                $aConditions['qid']=$sQID;
+            }
+            $aQuestions = Question::model()->findAllByAttributes($aConditions);
             $files = array();
-            foreach ($questions as $question)
+            foreach ($aQuestions as $question)
             {
 
                 $field = "{$question->sid}X{$question->gid}X{$question->qid}";
@@ -54,7 +60,6 @@
                     $files = array_merge($files, $data);
                 }
             }
-
             return $files;
         }
 
@@ -72,24 +77,31 @@
             }
             return parent::delete();
         }
-		public function relations()
-		{
+        public function relations()
+        {
             $t = $this->getTableAlias();
-			$result = array(
-				'token' => array(self::BELONGS_TO, 'Token_' . $this->dynamicId, array('token' => 'token')),
-				'survey' =>  array(self::BELONGS_TO, 'Survey', '', 'on' => "sid = {$this->dynamicId}" )
-			);
-			return $result;
-		}
+            $result = array(
+                'token' => array(self::BELONGS_TO, 'Token_' . $this->dynamicId, array('token' => 'token')),
+                'survey' =>  array(self::BELONGS_TO, 'Survey', '', 'on' => "sid = {$this->dynamicId}" )
+            );
+            return $result;
+        }
 
-		public function tableName()
-		{
-			return '{{survey_' . $this->dynamicId . '}}';
-		}
+        public function tableName()
+        {
+            return '{{survey_' . $this->dynamicId . '}}';
+        }
 
         public function getSurveyId() {
             return $this->dynamicId;
         }
-	}
+
+        public function browse(){
+
+        }
+        public function search(){
+            
+        }
+    }
 
 ?>

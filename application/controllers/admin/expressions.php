@@ -28,13 +28,14 @@ class Expressions extends Survey_Common_Action {
         if($needpermission && !Permission::model()->hasSurveyPermission($surveyid,'surveycontent','read'))
         {
             $message['title']= gT('Access denied!');
-            $message['message']= gT('You do not have sufficient rights to access this page.');
+            $message['message']= gT('You do not have permission to access this page.');
             $message['class']= "error";
             $this->_renderWrappedTemplate('survey', array("message"=>$message), $aData);
         }
         else
         {
             App()->getClientScript()->registerPackage('jqueryui');
+            App()->getClientScript()->registerPackage('decimal');
 
             $this->registerScriptFile( 'SCRIPT_PATH', 'survey_runtime.js');
             $this->registerScriptFile( 'SCRIPT_PATH', '/expressions/em_javascript.js');
@@ -45,7 +46,7 @@ class Expressions extends Survey_Common_Action {
             {
                 $aData['sidemenu']['state'] = false;
                 $surveyinfo = Survey::model()->findByPk($iSurveyID)->surveyinfo;
-                $aData['title_bar']['title'] = $surveyinfo['surveyls_title']."(".gT("ID").":".$iSurveyID.")";
+                $aData['title_bar']['title'] = $surveyinfo['surveyls_title']." (".gT("ID").":".$iSurveyID.")";
                 if(Yii::app()->request->getQuery('gid')!='')
                 {
                     $aData['questiongroupbar']['closebutton']['url'] = 'admin/questiongroups/sa/view/surveyid/'.$aData['surveyid'].'/gid/'.sanitize_int(Yii::app()->request->getQuery('gid'));

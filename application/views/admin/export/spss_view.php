@@ -1,12 +1,12 @@
 <div class='side-body <?php echo getSideBodyClass(false); ?>'>
-    <h3><?php eT("Export result data to SPSS");?></h3>
+    <h3><?php eT("Export response data to SPSS");?></h3>
     <?php echo CHtml::form(array("admin/export/sa/exportspss/sid/{$surveyid}/"), 'post', array('id'=>'exportspss', 'class'=>''));?>
     <div class="form-group row">
         <label for='completionstate' class='col-sm-2  form-control-label'><?php eT("Data selection:");?></label>
         <div class="col-sm-10">
             <?php $this->widget('yiiwheels.widgets.buttongroup.WhButtonGroup', array(
                 'name' => 'completionstate',
-                'value'=> incompleteAnsFilterState() ,
+                'value'=> 'all' ,
                 'selectOptions'=>array(
                     "all"=>gT("All responses",'unescaped'),
                     "complete"=>gT("Complete only",'unescaped'),
@@ -28,6 +28,19 @@
             ));?>
         </div>
     </div>
+    <?php
+    if (count($aLanguages)>1)
+    { ?>
+        <div class="form-group row">
+            <label for='exportlang'  class='col-sm-2  form-control-label'><?php eT("Language:");?></label>
+            <div class="col-sm-2">
+                <?php echo CHtml::dropDownList('exportlang', $sBaseLanguage, $aLanguages, array('class'=>'form-control')); ?>
+            </div>
+        </div>
+        <?php } else { ?>
+            <?php echo CHtml::hiddenField('exportlang', $sBaseLanguage); ?>
+
+        <?php } ?>
     <div class="form-group row">
         <label for='limit' class='col-sm-2  form-control-label'><?php eT("Limit:");?></label>
         <div class="col-sm-1">
@@ -40,6 +53,15 @@
             <input class="form-control" type='text' name='offset' value='<?php echo App()->getRequest()->getParam('offset');?>' />
         </div>
     </div>
+
+    <div class="form-group row">
+        <label for='offset' class='col-sm-2  form-control-label'><?php eT("No answer:");?></label>
+        <div class="col-sm-1">
+            <input class="form-control" type='text' name='noanswervalue' value='<?php echo App()->getRequest()->getParam('noanswervalue');?>' />
+        </div>
+    </div>
+
+
     <div class="form-group row">
         <input type='hidden' name='sid' value='<?php echo $surveyid;?>' />
         <input type='hidden' name='action' value='exportspss' />
@@ -68,5 +90,3 @@
     <?php eT("Your data should be imported now.");?></div>
 </div>
 <p>
-
-

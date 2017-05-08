@@ -74,7 +74,7 @@ abstract class LSYii_Controller extends CController
      * Loads a library
      *
      * @access public
-     * @param string $helper
+     * @param string $library
      * @return void
      */
     public function loadLibrary($library)
@@ -169,5 +169,14 @@ abstract class LSYii_Controller extends CController
         }
         else
             return parent::createAbsoluteUrl($route,$params,$schema,$ampersand);
+    }
+
+    /**
+     * Loads page states from a hidden input.
+     * @return array the loaded page states
+     */
+    protected function loadPageStates()
+    {
+        return array();
     }
 }

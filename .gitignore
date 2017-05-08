@@ -4,6 +4,7 @@
 /upload/templates/*
 /upload/labels/*
 /tmp/runtime/HTML
+/tmp/runtime/*.log*
 /application/controllers/admin/updater.php
 /tmp/*.html
 /tmp/*.lss
@@ -27,3 +28,11 @@ application/config/_config.php
 !readme.txt
 /tmp/runtime/URI/*.ser
 /tmp/runtime/CSS/*.ser
+/tmp/runtime/twig_cache/*
+launch.json
+# ignore plugins directory by default except LS plugin
+# if you want to add a new distributed plugin : add the directory here
+/plugins/*
+!/plugins/index.html
+!/plugins/Demo/
+!/plugins/AuditLog/

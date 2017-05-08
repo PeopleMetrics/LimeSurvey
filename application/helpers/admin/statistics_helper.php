@@ -24,7 +24,7 @@
 *  @param mixed $cache          An object containing [Hashkey] and [CacheFolder]
 *  @param mixed $sLanguageCode  Language Code
 *  @param string $sQuestionType The question type
-*  @return                Name
+*  @return                false|string
 */
 function createChart($iQuestionID, $iSurveyID, $type=null, $lbl, $gdata, $grawdata, $cache, $sLanguageCode, $sQuestionType)
 {
@@ -38,9 +38,7 @@ function createChart($iQuestionID, $iSurveyID, $type=null, $lbl, $gdata, $grawda
     }
     $rootdir = Yii::app()->getConfig("rootdir");
     $homedir = Yii::app()->getConfig("homedir");
-    $homeurl = Yii::app()->getConfig("homeurl");
     $admintheme = Yii::app()->getConfig("admintheme");
-    $scriptname = Yii::app()->getConfig("scriptname");
     $chartfontfile = Yii::app()->getConfig("chartfontfile");
     $chartfontsize = Yii::app()->getConfig("chartfontsize");
     $alternatechartfontfile = Yii::app()->getConfig("alternatechartfontfile");
@@ -109,7 +107,6 @@ function createChart($iQuestionID, $iSurveyID, $type=null, $lbl, $gdata, $grawda
     if (array_sum($gdata ) > 0) //Make sure that the percentages add up to more than 0
     {
         $graph = "";
-        $p1 = "";
         $i = 0;
         foreach ($gdata as $data)
         {
@@ -317,6 +314,7 @@ function createChart($iQuestionID, $iSurveyID, $type=null, $lbl, $gdata, $grawda
 * Return data to populate a Google Map
 * @param string$sField    Field name
 * @param $qsid             Survey id
+* @param string $sField
 * @return array
 */
 function getQuestionMapData($sField, $qsid)
@@ -638,7 +636,6 @@ class statistics_helper {
         $qtitle="";
         $qquestion="";
         $qtype="";
-        $statlang = $oLanguage;
         $firstletter = substr($rt, 0, 1);
         $fieldmap=createFieldMap($surveyid, "full", false, false, $language);
         $sDatabaseType = Yii::app()->db->getDriverName();
@@ -733,9 +730,6 @@ class statistics_helper {
             $qtitle=$nresult->title;
             $qtype=$nresult->type;
             $qquestion=flattenText($nresult->question);
-
-            //more substrings
-            $count = substr($qqid, strlen($qqid)-1);
 
             //get answers / subquestion text
             $nresult = Question::model()->find(array('order'=>'question_order',
@@ -899,10 +893,10 @@ class statistics_helper {
                     $statisticsoutput .=  "\n<table class='statisticstable table table-bordered >\n"
                     ."\t<thead><tr class='success'><th style='text-align: center; '><strong>".sprintf(gT("Field summary for %s"),$qtitle).":</strong>"
                     ."</th></tr>\n"
-                    ."\t<tr><th colspan='2' align='center'><strong>$qquestion</strong></th></tr>\n"
-                    ."\t<tr>\n\t\t<th width='50%' align='center' ><strong>"
+                    ."\t<tr><th colspan='2' align='right'><strong>$qquestion</strong></th></tr>\n"
+                    ."\t<tr>\n\t\t<th width='50%' align='right' ><strong>"
                     .gT("Calculation")."</strong></th>\n"
-                    ."\t\t<th width='50%' align='center' ><strong>"
+                    ."\t\t<th width='50%' align='right' ><strong>"
                     .gT("Result")."</strong></th>\n"
                     ."\t</tr></thead>\n";
 
@@ -979,12 +973,12 @@ class statistics_helper {
                     case 'html':
 
                         $statisticsoutput .= "\n<table class='statisticstable table table-bordered' >\n"
-                        ."\t<thead><tr  class='success'><th colspan='2' align='center'  class='success'><strong>".sprintf(gT("Field summary for %s"),$qtitle).":</strong>"
+                        ."\t<thead><tr  class='success'><th colspan='2' align='right'  class='success'><strong>".sprintf(gT("Field summary for %s"),$qtitle).":</strong>"
                         ."</th></tr>\n"
-                        ."\t<tr><th colspan='2' align='center'><strong>$qquestion</strong></th></tr>\n"
-                        ."\t<tr>\n\t\t<th width='50%' align='center' ><strong>"
+                        ."\t<tr><th colspan='2' align='right'><strong>$qquestion</strong></th></tr>\n"
+                        ."\t<tr>\n\t\t<th width='50%' align='right' ><strong>"
                         .gT("Calculation")."</strong></th>\n"
-                        ."\t\t<th width='50%' align='center' ><strong>"
+                        ."\t\t<th width='50%' align='right' ><strong>"
                         .gT("Result")."</strong></th>\n"
                         ."\t</tr></thead>\n";
 
@@ -1070,7 +1064,6 @@ class statistics_helper {
 
                     //Display the maximum and minimum figures after the quartiles for neatness
                     $maximum=$row['maximum'];
-                    $minimum=$row['minimum'];
                 }
 
 
@@ -1113,8 +1106,8 @@ class statistics_helper {
                         case 'html':
 
                             $statisticsoutput .= "\t<tr>\n"
-                            ."\t\t<td align='center' >$shw[0]</td>\n"
-                            ."\t\t<td align='center' >$shw[1]</td>\n"
+                            ."\t\t<td align='right' >$shw[0]</td>\n"
+                            ."\t\t<td align='right' >$shw[1]</td>\n"
                             ."\t</tr>\n";
 
                             break;
@@ -1154,7 +1147,7 @@ class statistics_helper {
 
                         //footer of question type "N"
                         $statisticsoutput .= "\t<tr class='info'>\n"
-                        ."\t\t<td colspan='4' align='center'>\n"
+                        ."\t\t<td colspan='4' align='right'>\n"
                         ."\t\t\t<font size='1'>".gT("Null values are ignored in calculations")."<br />\n"
                         ."\t\t\t".sprintf(gT("Q1 and Q3 calculated using %s"), "<a href='http://mathforum.org/library/drmath/view/60969.html' target='_blank'>".gT("minitab method")."</a>")
                         ."</font>\n"
@@ -1163,7 +1156,7 @@ class statistics_helper {
                         if($browse)
                         {
                             $statisticsoutput .= "\t<tr>\n"
-                            ."\t\t<td align='center'  colspan='4'>
+                            ."\t\t<td align='right'  colspan='4'>
                             <input type='button' class='statisticsbrowsebutton numericalbrowse btn btn-default btn-large' value='"
                             .gT("Browse")."' id='$fieldname' /></td>\n</tr>";
                             $statisticsoutput .= "<tr><td class='statisticsbrowsecolumn' colspan='3' style='display: none'>
@@ -1205,7 +1198,7 @@ class statistics_helper {
 
                             //output
                             $statisticsoutput .= "\t<tr>\n"
-                            ."\t\t<td align='center'  colspan='4'>".gT("Not enough values for calculation")."</td>\n"
+                            ."\t\t<td align='right'  colspan='4'>".gT("Not enough values for calculation")."</td>\n"
                             ."\t</tr>\n</table><br />\n";
 
                             break;
@@ -1270,7 +1263,6 @@ class statistics_helper {
                 $qtype=$nrow[1];
                 $qquestion=flattenText($nrow[2]);
                 $qiqid=$nrow[3];
-                $qparentqid=$nrow[4];
                 $qother=$nrow[5];
             }
 
@@ -1585,29 +1577,32 @@ class statistics_helper {
                     if ( $qtype == "O")
                     {
                         //add "comment"
-                        $alist[]=array(gT("Comments"),gT("Comments"),$fielddata['fieldname'].'comment');
+                        $alist[]=array(gT("Comments"),gT("Comments"),$fielddata['fieldname'].'comment','is_comment');
+                        //
                     }
 
             }    //end switch question type
 
             //moved because it's better to have "no answer" at the end of the list instead of the beginning
             //put data into array
-            $alist[]=array("", gT("No answer"));
+            $alist[]=array("", gT("No answer"), false, 'is_no_answer');
 
         }
 
         return array("alist"=>$alist, "qtitle"=>$qtitle, "qquestion"=>$qquestion, "qtype"=>$qtype, "statisticsoutput"=>$statisticsoutput, "parentqid"=>$qqid);
     }
 
+    /**
+     * @param string $outputType
+     * @param integer $usegraph
+     * @param boolean $browse
+     */
     protected function displaySimpleResults($outputs, $results, $rt, $outputType, $surveyid, $sql, $usegraph, $browse, $sLanguage)
     {
         /* Set up required variables */
         $TotalCompleted = 0; //Count of actually completed answers
         $statisticsoutput="";
         $sDatabaseType = Yii::app()->db->getDriverName();
-        $tempdir = Yii::app()->getConfig("tempdir");
-        $tempurl = Yii::app()->getConfig("tempurl");
-        $firstletter = substr($rt, 0, 1);
         $astatdata=array();
 
         //loop though the array which contains all answer data
@@ -1829,9 +1824,6 @@ class statistics_helper {
 
                 //put question title and code into array
                 $label[]=$fname;
-
-                //put only the code into the array
-                $justcode[]=$al[0];
 
                 //edit labels and put them into antoher array
 
@@ -2125,7 +2117,7 @@ class statistics_helper {
                 $statisticsoutput .= Yii::app()->getController()->renderPartial('/admin/export/generatestats/simplestats/_statisticsoutput_answer', $aData, true);
 
             }    //end while
-            $statisticsoutput .= '</table>';
+            //$statisticsoutput .= '</table>';
             $aData['showaggregateddata'] = false;
 
             //only show additional values when this setting is enabled
@@ -2378,10 +2370,10 @@ class statistics_helper {
     * @param mixed $outputs
     * @param INT $results The number of results being displayed overall
     * @param mixed $rt
-    * @param mixed $outputType
+    * @param string $outputType
     * @param mixed $surveyid
     * @param mixed $sql
-    * @param mixed $usegraph
+    * @param integer $usegraph
      *
      *
     */
@@ -2392,8 +2384,6 @@ class statistics_helper {
         $statisticsoutput   = "";
         $sDatabaseType      = Yii::app()->db->getDriverName();
         $tempdir            = Yii::app()->getConfig("tempdir");
-        $tempurl            = Yii::app()->getConfig("tempurl");
-        $firstletter        = substr($rt, 0, 1);
         $astatdata          = array();
 
         if ($usegraph==1 && $outputType != 'html')
@@ -2443,6 +2433,8 @@ class statistics_helper {
         }
         //loop though the array which contains all answer data
         $ColumnName_RM=array();
+        //echo '<pre>'; var_dump($outputs['alist']); echo '</pre>';die;
+        $statisticsoutput_footer  = "<script>";
         foreach ($outputs['alist'] as $al)
         {
             //picks out answer list ($outputs['alist']/$al)) that come from the multiple list above
@@ -2803,6 +2795,11 @@ class statistics_helper {
             //put absolute data into array
             $grawdata[]=$row;
 
+            if(! ( in_array( 'is_comment', $al) || in_array( 'is_no_answer', $al) ) )
+            {
+                $grawdata_percents[]=$row;
+            }
+            //var_dump($grawdata); die();
             //put question title and code into array
             $label[]=$fname;
 
@@ -2839,23 +2836,30 @@ class statistics_helper {
                 $lbl[$flatLabel] = $row;
             }
 
+
+
             // For Graph labels
             switch($_POST['graph_labels'])
             {
                 case 'qtext':
-                    $aGraphLabels[] = $flatLabel;
+                    $aGraphLabels[] = $sFlatLabel = $flatLabel;
                 break;
 
                 case 'both':
-                    $aGraphLabels[] = $al[0].': '.$flatLabel;
+                    $aGraphLabels[] = $sFlatLabel = $al[0].': '.$flatLabel;
                 break;
 
                 default:
-                    $aGraphLabels[] = $al[0];
+                    $aGraphLabels[] = $sFlatLabel = $al[0];
                 break;
             }
 
 
+            if(! ( in_array( 'is_comment', $al) || in_array( 'is_no_answer', $al) ) )
+            {
+                $aGraphLabelsPercent[] = $sFlatLabel;
+                $lblPercent[$flatLabel] = $lbl[$flatLabel];
+            }
 
         }    //end foreach -> loop through answer data
 
@@ -3066,7 +3070,6 @@ class statistics_helper {
         $aData['bShowCount']      = (isset($bShowCount))?$bShowCount:false;
         $aData['bShowPercentage'] = (isset($bShowPercentage))?$bShowPercentage:false;
         $statisticsoutput         =  Yii::app()->getController()->renderPartial('/admin/export/generatestats/_statisticsoutput_header', $aData, true);
-
         //loop through all available answers
         ////
         while (isset($gdata[$i]))
@@ -3342,9 +3345,30 @@ class statistics_helper {
             //Clear extraline
             unset($extraline);
 
+
+            // Convert grawdata_percent to percent
+
+            if (isset($grawdata_percents))
+            {
+                $pTotal = array_sum($grawdata_percents);
+                if ( $pTotal > 0)
+                {
+                    foreach($grawdata_percents as $key => $data)
+                    {
+                        $grawdata_percents[$key] = round(($data/$pTotal)*100, 2);
+                    }
+
+                }
+            }
+            else
+            {
+                $grawdata_percents = array();
+            }
+
             ///// HERE RENDER statisticsoutput_answer
             $aData['label']                = $label;
             $aData['grawdata']             = $grawdata;
+            $aData['grawdata_percent']     = $grawdata_percents;
             $aData['gdata']                = $gdata;
 
             $aData['extraline']            = (isset($extraline))?$extraline:false;
@@ -3364,7 +3388,6 @@ class statistics_helper {
             // Generate answer
             // _statisticsoutput_answer
             $statisticsoutput .= Yii::app()->getController()->renderPartial('/admin/export/generatestats/_statisticsoutput_answer', $aData, true);
-
             $extraline            = false;
             $aggregated           = false;
             $aggregatedPercentage = false;
@@ -3677,6 +3700,17 @@ class statistics_helper {
                              $labels = array();
                              foreach($lbl as $name => $lb)
                                    $labels[] = $name;
+
+                             if ( isset($lblPercent)  )
+                             {
+                                 foreach($lblPercent as  $name => $lb)
+                                    $labels_percent[] = $name;
+                             }
+                             else
+                             {
+                                 $labels_percent = array();
+                             }
+
                             break;
                         default:
                             break;
@@ -3697,7 +3731,8 @@ class statistics_helper {
 
                 // Labels for graphs
                 $iMaxLabelLength = 0;
-                foreach($aGraphLabels as $key => $label)
+
+                foreach ($aGraphLabels as $key => $label)
                 {
                     $cleanLabel = $label;
                     $cleanLabel = viewHelper::flatEllipsizeText($cleanLabel, true, 20);
@@ -3705,12 +3740,20 @@ class statistics_helper {
                     $iMaxLabelLength = (strlen( $cleanLabel ) > $iMaxLabelLength)?strlen( $cleanLabel ):$iMaxLabelLength;
                 }
 
-                // Labels for legend
-                foreach($labels as $key => $label)
+                if( isset($aGraphLabelsPercent))
                 {
-                    $cleanLabel = $label;
-                    $labels[$key] = $cleanLabel;
+                    foreach ($aGraphLabelsPercent as $key => $label)
+                    {
+                        $cleanLabel = $label;
+                        $cleanLabel = viewHelper::flatEllipsizeText($cleanLabel, true, 20);
+                        $graph_labels_percent[$key] = $cleanLabel;
+                    }
                 }
+                else
+                {
+                    $graph_labels_percent = array();
+                }
+
 
                 $iCanvaHeight = $iMaxLabelLength * 3;
                 $aData['iCanvaHeight'] = ($iCanvaHeight > 150)?$iCanvaHeight:150;
@@ -3719,6 +3762,7 @@ class statistics_helper {
                 $aData['rt'] = $rt;
                 $aData['qqid'] = $qqid;
                 $aData['graph_labels'] = $graph_labels;
+                $aData['graph_labels_percent'] = $labels_percent;
                 $aData['labels'] = $labels;
                 //$aData['COLORS_FOR_SURVEY'] = COLORS_FOR_SURVEY;
                 $aData['charttype'] = (isset($charttype))?$charttype:'Bar';
@@ -3730,17 +3774,18 @@ class statistics_helper {
                 ///
 
                 $statisticsoutput .=  Yii::app()->getController()->renderPartial('/admin/export/generatestats/_statisticsoutput_graphs', $aData, true);
-
+                $statisticsoutput_footer .= Yii::app()->getController()->renderPartial('/admin/export/generatestats/_statisticsoutput_footer', $aData, true);
             }
-            $statisticsoutput .= "</table></div> <!-- in statistics helper --> \n";
+            $statisticsoutput .= "</table></div><!-- in statistics helper --> \n";
         }
-
+         $statisticsoutput =  $statisticsoutput. $statisticsoutput_footer."</script>";
         return array("statisticsoutput"=>$statisticsoutput, "pdf"=>$this->pdf, "astatdata"=>$astatdata);
 
     }
 
     /**
      * Generate simple statistics
+     * @param string[] $allfields
      */
      public function generate_simple_statistics($surveyid, $allfields, $q2show='all', $usegraph=0, $outputType='pdf', $pdfOutput='I',$sLanguageCode=null, $browse = true)
      {
@@ -3749,8 +3794,6 @@ class statistics_helper {
              Yii::import('application.helpers.surveytranslator_helper', true);
              Yii::import('application.third_party.ar-php.Arabic', true);
 
-             $sTempDir = Yii::app()->getConfig("tempdir");
-
              //pick the best font file if font setting is 'auto'
              if (is_null($sLanguageCode))
              {
@@ -3758,17 +3801,9 @@ class statistics_helper {
              }
              //Yii::app()->setLanguage($sLanguageCode);
 
-             /*
-             * this variable is used in the function shortencode() which cuts off a question/answer title
-             * after $maxchars and shows the rest as tooltip (in html mode)
-             */
-             $maxchars = 13;
-
              //Get an array of codes of all available languages in this survey
              $surveylanguagecodes = Survey::model()->findByPk($surveyid)->additionalLanguages;
              $surveylanguagecodes[] = Survey::model()->findByPk($surveyid)->language;
-
-             $fieldmap=createFieldMap($surveyid, "full", false, false, $sLanguageCode);
 
              // Set language for questions and answers to base language of this survey
              $language=$sLanguageCode;
@@ -3882,20 +3917,11 @@ class statistics_helper {
         Yii::import('application.helpers.surveytranslator_helper', true);
         Yii::import('application.third_party.ar-php.Arabic', true);
 
-        $sTempDir = Yii::app()->getConfig("tempdir");
-
         //pick the best font file if font setting is 'auto'
         if (is_null($sLanguageCode))
         {
             $sLanguageCode =  getBaseLanguageFromSurveyID($surveyid);
         }
-        //Yii::app()->setLanguage($sLanguageCode);
-
-        /*
-        * this variable is used in the function shortencode() which cuts off a question/answer title
-        * after $maxchars and shows the rest as tooltip (in html mode)
-        */
-        $maxchars = 13;
 
         //no survey ID? -> come and get one
         if (!isset($surveyid)) {$surveyid=returnGlobal('sid');}
@@ -3903,8 +3929,6 @@ class statistics_helper {
         //Get an array of codes of all available languages in this survey
         $surveylanguagecodes = Survey::model()->findByPk($surveyid)->additionalLanguages;
         $surveylanguagecodes[] = Survey::model()->findByPk($surveyid)->language;
-
-        $fieldmap=createFieldMap($surveyid, "full", false, false, $sLanguageCode);
 
         // Set language for questions and answers to base language of this survey
         $language=$sLanguageCode;
@@ -3937,7 +3961,6 @@ class statistics_helper {
                     //Get answers. We always use the answer code because the label might be too long elsewise
                     $query = "SELECT code, answer FROM {{answers}} WHERE qid='".$field['qid']."' AND scale_id=0 AND language='{$language}' ORDER BY sortorder, answer";
                     $result = Yii::app()->db->createCommand($query)->query();
-                    $counter2=0;
 
                     //check all the answers
                     foreach ($result->readAll() as $row)
@@ -4105,12 +4128,10 @@ class statistics_helper {
     * @param int $surveyid The survey id
     * @param mixed $allfields
     * @param mixed $q2show
-    * @param mixed $usegraph
+    * @param integer $usegraph
     * @param string $outputType Optional - Can be xls, html or pdf - Defaults to pdf
-    * @param string $pdfOutput Sets the target for the PDF output: DD=File download , F=Save file to local disk
-    * @param string $statlangcode Lamguage for statistics
     * @param mixed $browse  Show browse buttons
-    * @return buffer
+    * @return string
     */
     public function generate_statistics($surveyid, $allfields, $q2show='all', $usegraph=0, $outputType='pdf', $outputTarget='I',$sLanguageCode=null, $browse = true)
     {
@@ -4130,13 +4151,7 @@ class statistics_helper {
         {
             $sLanguageCode =  getBaseLanguageFromSurveyID($surveyid);
         }
-        //Yii::app()->setLanguage($sLanguageCode);
 
-        /*
-        * this variable is used in the function shortencode() which cuts off a question/answer title
-        * after $maxchars and shows the rest as tooltip (in html mode)
-        */
-        $maxchars = 13;
         //we collect all the html-output within this variable
         $sOutputHTML ='';
         /**
@@ -4148,8 +4163,6 @@ class statistics_helper {
 
         //no survey ID? -> come and get one
         if (!isset($surveyid)) {$surveyid=returnGlobal('sid');}
-
-        $fieldmap=createFieldMap($surveyid, "full", false, false, $sLanguageCode);
 
         // Set language for questions and answers to base language of this survey
         $language=$sLanguageCode;
@@ -4182,7 +4195,6 @@ class statistics_helper {
                     //Get answers. We always use the answer code because the label might be too long elsewise
                     $query = "SELECT code, answer FROM {{answers}} WHERE qid='".$field['qid']."' AND scale_id=0 AND language='{$language}' ORDER BY sortorder, answer";
                     $result = Yii::app()->db->createCommand($query)->query();
-                    $counter2=0;
 
                     //check all the answers
                     foreach ($result->readAll() as $row)
@@ -4288,8 +4300,6 @@ class statistics_helper {
             $this->formatBold = &$this->workbook->addFormat(array('Bold'=>1));
             $this->sheet->setInputEncoding('utf-8');
             $this->sheet->setColumn(0,20,20);
-            $separator="~|";
-            /**XXX*/
         }
         /**
         * Start generating
@@ -4524,7 +4534,7 @@ class statistics_helper {
     * @staticvar int $recordCount
     * @staticvar null $field
     * @staticvar null $allRows
-    * @param 0|1|2|3 $quartile use 0 for return of recordcount, otherwise will return Q1,Q2,Q3
+    * @param integer $quartile use 0 for return of recordcount, otherwise will return Q1,Q2,Q3
     * @param string $fieldname
     * @param int $surveyid
     * @param string $sql

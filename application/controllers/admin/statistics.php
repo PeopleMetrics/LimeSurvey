@@ -192,6 +192,7 @@ class statistics extends Survey_Common_Action {
 
         $grapherror = false;
         $error = '';
+        $usegraph = (int)Yii::app()->request->getPost('usegraph',0);
         if (!function_exists("gd_info")) {
             $grapherror = true;
             $error.='<br />'.gT('You do not have the GD Library installed. Showing charts requires the GD library to function properly.');
@@ -205,7 +206,7 @@ class statistics extends Survey_Common_Action {
 
         if ($grapherror)
         {
-            unset($_POST['usegraph']);
+            $usegraph=0;
         }
 
 
@@ -466,17 +467,14 @@ class statistics extends Survey_Common_Action {
 
         Yii::app()->loadHelper('admin/statistics');
         $helper = new statistics_helper();
-        $showtextinline=isset($_POST['showtextinline']) ? 1 : 0;
+        $showtextinline = (int)Yii::app()->request->getPost('showtextinline',0);
         $aData['showtextinline'] = $showtextinline;
-
+        $aData['usegraph'] = $usegraph;
+        
         //Show Summary results
         if (isset($summary) && $summary)
         {
-            $usegraph=isset($_POST['usegraph']) ? 1 : 0;
-            $aData['usegraph'] = $usegraph;
-            $outputType = $_POST['outputtype'];
-
-
+            $outputType = Yii::app()->request->getPost('outputtype','html');
             switch($outputType){
                 case 'html':
                     $statisticsoutput .=  $helper->generate_html_chartjs_statistics($surveyid,$summary,$summary,$usegraph,$outputType,'DD',$statlang);
@@ -494,10 +492,7 @@ class statistics extends Survey_Common_Action {
             }
 
         }    //end if -> show summary results
-
-        $usegraph=isset($_POST['usegraph']) ? 1 : 0;
-        $aData['usegraph'] = $usegraph;
-
+                
         $aData['sStatisticsLanguage']=$statlang;
         $aData['output'] = $statisticsoutput;
         $aData['summary'] = $summary;
@@ -518,6 +513,11 @@ class statistics extends Survey_Common_Action {
         $aData['oStatisticsHelper'] = $helper;
         $aData['fresults'] = (isset($aData['fresults']))?$aData['fresults']:false;
         $aData['dateformatdetails'] = getDateFormatData(Yii::app()->session['dateformat']);
+
+        if (!isset($aData['result']))
+        {
+            $aData['result'] = null;
+        }
 
         $this->_renderWrappedTemplate('export', 'statistics_view', $aData);
 
@@ -782,7 +782,7 @@ class statistics extends Survey_Common_Action {
 
         Yii::app()->loadHelper('admin/statistics');
         $helper = new statistics_helper();
-        $showtextinline=isset($_POST['showtextinline']) ? 1 : 0;
+        $showtextinline = (int)Yii::app()->request->getPost('showtextinline',0);
         $aData['showtextinline'] = $showtextinline;
 
         //Show Summary results
@@ -800,22 +800,34 @@ class statistics extends Survey_Common_Action {
         //Call the javascript file
         $this->registerScriptFile( 'ADMIN_SCRIPT_PATH', 'statistics.js');
         $this->registerScriptFile( 'ADMIN_SCRIPT_PATH', 'json-js/json2.min.js');
+        yii::app()->clientScript->registerPackage('jspdf');
         echo $this->_renderWrappedTemplate('export', 'statistics_user_view', $aData);
      }
+
+
+    public function setIncompleteanswers()
+    {
+        $sIncompleteAnswers = Yii::app()->request->getPost('state');
+        if (in_array($sIncompleteAnswers,array('all', 'complete', 'incomplete')))
+        {
+            Yii::app()->session['incompleteanswers']= $sIncompleteAnswers;            
+        }
+
+    }
 
     /**
      * Renders template(s) wrapped in header and footer
      *
      * @param string $sAction Current action, the folder to fetch views from
-     * @param string|array $aViewUrls View url(s)
+     * @param string $aViewUrls View url(s)
      * @param array $aData Data to be passed on. Optional.
      */
     protected function _renderWrappedTemplate($sAction = 'export', $aViewUrls = array(), $aData = array())
     {
-        $switch = Yii::app()->getBaseUrl(true).'/application/extensions/yiiwheels/widgets/switch/assets/js/bootstrap-switch.min.js ';
-        App()->getClientScript()->registerScriptFile( $switch );
+        yii::app()->clientScript->registerPackage('bootstrap-switch');
+        yii::app()->clientScript->registerPackage('jspdf');
 
-        $aData['menu']['closeurl'] = Yii::app()->request->getUrlReferrer(Yii::app()->createUrl("/admin/survey/sa/view/surveyid/".$aData['surveyid']), array('simpleStatistics', 'admin/statistics/sa/index') );
+        $aData['menu']['closeurl'] = Yii::app()->request->getUrlReferrer(Yii::app()->createUrl("/admin/survey/sa/view/surveyid/".$aData['surveyid']) );
 
         $aData['display'] = array();
         $aData['display']['menu_bars'] = false;

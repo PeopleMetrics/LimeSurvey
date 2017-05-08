@@ -61,7 +61,11 @@ class UploaderController extends SurveyController {
             }
             if(is_file($sFileDir.$sFileGetContent))// Validate file before else 500 error by getMimeType
             {
-                header('Content-Type: '. CFileHelper::getMimeType($sFileDir.$sFileGetContent));
+                $mimeType=CFileHelper::getMimeType($sFileDir.$sFileGetContent, null, false);
+                if(is_null($mimeType)){
+                    $mimeType="application/octet-stream"; // Can not really get content if not image
+                }
+                header('Content-Type: '. $mimeType);
                 readfile($sFileDir.$sFileGetContent);
                 Yii::app()->end();
             }
@@ -182,7 +186,7 @@ class UploaderController extends SurveyController {
                                 "name"          => rawurlencode(basename($filename)),
                                 "ext"           => $ext,
                                 "filename"      => $randfilename,
-                                "msg"           => gT("The file has been successfuly uploaded.")
+                                "msg"           => gT("The file has been successfully uploaded.")
                             );
                     // TODO : unlink this file since this is just a preview. But we can do it only if it's not needed, and still needed to have the file content
                     // Maybe use a javascript 'onunload' on preview question/group
@@ -193,7 +197,7 @@ class UploaderController extends SurveyController {
                 }
             }
             else
-            {    // if everything went fine and the file was uploaded successfuly,
+            {    // if everything went fine and the file was uploaded successfully,
                  // send the file related info back to the client
                  $iFileUploadTotalSpaceMB = Yii::app()->getConfig("iFileUploadTotalSpaceMB");
                 if ($size > $maxfilesize)
@@ -224,7 +228,7 @@ class UploaderController extends SurveyController {
                         "name"    => rawurlencode(basename($filename)),
                         "ext"     => $ext,
                         "filename"      => $randfilename,
-                        "msg"     => gT("The file has been successfuly uploaded.")
+                        "msg"     => gT("The file has been successfully uploaded.")
                     );
                     //header('Content-Type: application/json');
                     echo ls_json_encode($return);
@@ -333,7 +337,7 @@ class UploaderController extends SurveyController {
         $oTemplate = Template::model()->getInstance('', $aSurveyInfo['sid']);
         foreach ($oTemplate->packages as $package)
         {
-            App()->getClientScript()->registerPackage($package);
+            App()->getClientScript()->registerPackage((string) $package);
         }
         foreach ($oTemplate->config->files->css->filename as $cssFile)
         {

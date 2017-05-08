@@ -14,6 +14,9 @@
 
 // @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&dn=gpl-2.0.txt  GNU/GPL License v2 or later
 
+// Namespace
+var LS = LS || {};
+
 /* Set a variable to test if browser have HTML5 form ability
  * Need to be replaced by some polyfills see #8009
  */
@@ -53,143 +56,6 @@ $(document).ready(function(){
             console.log($linkUrl);
         });
     }
-
-    /*
-     * List mass actions
-     * TODO: refactore it to handle the different possible actions (modal, redirect with post, redirect with session,etc. ) in cleanest way
-     */
-    if($('.listActions').length>0){
-        // Define what should be done when clicking on a action link
-        $(document).on('click', '.listActions a', function () {
-                $that        = $(this);
-                $action      = $that.data('action');                                                // The action string, to display in the modal body (eg: sure you wann $action?)
-                $actionTitle = $that.data('action-title');                                          // The action title, to display in the modal title
-                $actionUrl   = $that.data('url');                                                   // The url of the Survey Controller action to call
-                $gridid      = $('.listActions').data('grid-id');
-
-                $oCheckedItems = $.fn.yiiGridView.getChecked($gridid, $('.listActions').data('pk'));                   // List of the clicked checkbox
-
-
-                // For actions without modal, doing a redirection
-                if($that.data('post-redirect'))
-                {
-                    var newForm = jQuery('<form>', {
-                        'action': $actionUrl,
-                        'target': '_blank',
-                        'method': 'POST'
-                    }).append(jQuery('<input>', {
-                        'name': $that.data('input-name'),
-                        'value': $oCheckedItems.join("|"),
-                        'type': 'hidden'
-                    })).append(jQuery('<input>', {
-                        'name': 'YII_CSRF_TOKEN',
-                        'value': LS.data.csrfToken,
-                        'type': 'hidden'
-                    })).appendTo('body');
-                    newForm.submit();
-                    return;
-                }
-
-                if($that.data('fill-session-and-redirect'))
-                {
-                    // postUrl is defined as a var in the View
-                    $("#addcpdb").load(postUrl, {
-                        participantid:$oCheckedItems},function(){
-                            $(location).attr('href',$actionUrl);
-                    });
-                    return;
-                }
-
-                $oCheckedItems  = JSON.stringify($oCheckedItems);
-                $modal       = $('#confirmation-modal');                        // The modal we want to use
-                $actionUrl   = $actionUrl;
-                // Do we need to post sid?
-                if($that.data('sid'))
-                {
-                    $iSid = $that.data('sid');
-                    $postDatas   = {sItems:$oCheckedItems, iSid:$iSid};
-                }
-                else
-                {
-                    $postDatas   = {sItems:$oCheckedItems};
-                }
-
-                // Do we want to update the modal content after confirmation?
-                if($that.data('keepopen'))
-                {
-                    $keepopen = ($that.data('keepopen')==='yes');
-                }
-                else
-                {
-                    $keepopen = true;
-                }
-                $modal.data('keepopen', $keepopen);
-
-                // Needed modal elements
-                $modalTitle    = $modal.find('.modal-title');                   // Modal Title
-                $modalBody     = $modal.find('.modal-body-text');               // Modal Body
-                $modalYesNo    = $modal.find('.modal-footer-yes-no');           // Modal footer with yes/no buttons
-                $modalClose    = $modal.find('.modal-footer-close');            // Modal footer with close button
-                $ajaxLoader    = $("#ajaxContainerLoading");                    // Ajax loader
-
-                // Original modal state
-                $oldModalTitle  = $modalTitle.text();
-                $oldModalBody   = $modalBody.html();
-
-                // New modal contents
-                $modalWarningTitle  = $that.data('modal-warning-title');        // The action string, to display in the modal body (eg: sure you wann $action?)
-                $modalWarningText   = $that.data('modal-warning-text');
-
-                // We update the modal
-                $modal.find('.modal-title').text($modalWarningTitle);
-                $modal.find('.modal-body-text').text($modalWarningText);
-
-                // When user close the modal, we put it back to its original state
-                $modal.on('hidden.bs.modal', function (e) {
-                    $modal.data('onclick', null);                   // We reset the onclick event
-                    $modalTitle.text($oldModalTitle);               // the modal title
-                    $modalBody.empty().append($oldModalBody);       // modal body
-                    $modalClose.hide();                             // Hide the 'close' button
-                    $modalYesNo.show();                             // Show the 'Yes/No' buttons
-                })
-
-                // Define what should be done when user confirm the mass action
-                $modal.data('onclick', function(){
-                    // Update the modal elements
-                    $modalTitle.text($actionTitle);                             // Change the modal title to the action title
-                    $modalBody.empty();                                         // Empty the modal body
-                    $modalYesNo.hide();                                         // Hide the 'Yes/No' buttons
-                    $modalClose.show();                                         // Show the 'close' button
-                    $ajaxLoader.show();                                         // Show the ajax loader
-
-                    // Ajax request
-                    $.ajax({
-                        url : $actionUrl,
-                        type : 'POST',
-                        data :  $postDatas,
-
-                        // html contains the buttons
-                        success : function(html, statut){
-                            $.fn.yiiGridView.update($gridid);                   // Update the surveys list
-                            $ajaxLoader.hide();                                 // Hide the ajax loader
-                            $modalBody.empty().html(html);                      // Inject the returned HTML in the modal body
-                        },
-                        error :  function(html, statut){
-                            $ajaxLoader.hide();
-                            $modal.find('.modal-body-text').empty().html(html.responseText);
-                            console.log(html);
-                        }
-                    });
-                });
-
-                // open the modal
-                if(!$.isEmptyObject($oCheckedItems))
-                {
-                    $modal.modal();
-                }
-            });
-    }
-
 
     /* Switch format group */
     if ($('#switchchangeformat').length>0){
@@ -315,27 +181,29 @@ $(document).ready(function(){
 
         var onclick = null;
         var href = null;
-        if($(this).data('href'))
-        {
-            var href = $(this).data('href');    // When calling modal from javascript
+
+        if ($(this).data('href')) {
+            href = $(this).data('href');    // When calling modal from javascript
         }
-        else
-        {
-            var href = $(e.relatedTarget).data('href');
+        else {
+            href = $(e.relatedTarget).data('href');
         }
 
-        if($(this).data('onclick'))
-        {
-            var onclick = $(this).data('onclick');
+        if ($(this).data('onclick')) {
+            onclick = $(this).data('onclick');
         }
-        else
-        {
-            var onclick = $(e.relatedTarget).data('onclick');
+        else {
+            onclick = $(e.relatedTarget).data('onclick');
+        }
+
+        // Get message
+        var message = $(this).data('message');
+        if (message) {
+            $(this).find('.modal-body-text').html(message);
         }
 
         $keepopen = $(this).data('keepopen');
-        if (href != '' && href !== undefined)
-        {
+        if (href != '' && href !== undefined) {
             $(this).find('.btn-ok').attr('href', href);
         }
         else if (onclick != '' && onclick !== undefined) {
@@ -353,9 +221,32 @@ $(document).ready(function(){
                 });
             }
             else {
-                throw "Confirmation modal: onclick is not a function.";
+                throw "Confirmation modal: onclick is not a function. Wrap data-onclick content in (function() { ... }).";
             }
 
+        }
+        else if ($(e.relatedTarget).data('ajax-url')) {
+            var postDatas   = $(e.relatedTarget).data('post');
+            var gridid      = $(e.relatedTarget).data('gridid');
+
+            $(this).find('.btn-ok').on('click', function(ev)
+            {
+                $.ajax({
+                    type: "POST",
+                    url: $(e.relatedTarget).data('ajax-url'),
+                    data: postDatas,
+
+                    success : function(html, statut)
+                    {
+                        $.fn.yiiGridView.update(gridid);                   // Update the surveys list
+                        $('#confirmation-modal').modal('hide');
+                    },
+                    error :  function(html, statut){
+                        $('#confirmation-modal .modal-body-text').append(html.responseText);
+                    }
+
+                });
+            });
         }
         else {
             throw "Confirmation modal: Found neither data-href or data-onclick.";
@@ -493,9 +384,7 @@ function doToolTip()
     // button. E.g., <button data-toggle='modal' data-tooltip='true' title="foo">...</button>
     $('[data-tooltip="true"]').tooltip();
 
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
+    $('[data-toggle="tooltip"]').tooltip()
 
     // ToolTip on menu
     $(".sf-menu li").each(function() {
@@ -884,6 +773,7 @@ function linksInDialog()
         });
     });
 }
+
 function initializeAjaxProgress()
 {
     $('#ajaxprogress').dialog({
@@ -943,6 +833,7 @@ function sendPost(myaction,checkcode,arrayparam,arrayval)
     $form.appendTo("body");
     $form.submit();
 }
+
 function addHiddenElement(theform,thename,thevalue)
 {
     var myel = document.createElement('input');
@@ -952,13 +843,171 @@ function addHiddenElement(theform,thename,thevalue)
     myel.value = thevalue;
     return myel;
 }
+
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-/** For homepagesettings button edit */
-$(document).ready(function() {
+/**
+ * A method to use the implemented notifier, via ajax or javascript
+ * 
+ * @param text string  | The text to be displayed
+ * @param classes string | The classes that will be put onto the inner container
+ * @param styles object | An object of css-attributes that will be put onto the inner container
+ * @param customOptions | possible options are: 
+ *                         useHtml (boolean) -> use the @text as html
+ *                         timeout (int) -> the timeout in milliseconds until the notifier will fade/slide out 
+ *                         inAnimation (string) -> The jQuery animation to call for the notifier [fadeIn||slideDown]
+ *                         outAnimation (string) -> The jQuery animation to remove the notifier [fadeOut||slideUp]
+ *                         animationTime (int) -> The time in milliseconds the animation will last             
+ */
+function NotifyFader(){
+    var count = 0;
+    
+    var increment = function(){count = count+1;},
+        decrement = function(){count = count-1;},
+        getCount = function(){return count;};
 
-});
+    var create = function(text, classes, styles, customOptions){
+        increment();
+        customOptions = customOptions || {};
+        styles = styles || {};
+        classes = classes || "well well-lg";
 
-// @license-end
+        var options = {
+            useHtml : customOptions.useHtml || true,
+            timeout : customOptions.timeout || 3500,
+            inAnimation : customOptions.inAnimation || "slideDown", 
+            outAnimation : customOptions.outAnimation || "slideUp", 
+            animationTime : customOptions.animationTime || 450
+        };
+        var container = $("<div> </div>");
+        container.addClass(classes);
+        container.css(styles);
+        if(options.useHtml){
+            container.html(text);
+        } else {
+            container.text(text);
+        }
+        var newID = "notif-container_"+getCount();
+        $('#notif-container').clone()
+            .attr('id', newID)
+            .css({
+                display: 'none',
+                top : (8*((getCount())))+"%",
+                position: 'fixed',
+                left : "15%",
+                width : "70%",
+                'z-index':3500 
+            })
+            .appendTo($('#notif-container').parent())
+            .html(container);
+
+        $('#'+newID)[options.inAnimation](options.animationTime, function(){
+            var remove = function(){
+                $('#'+newID)[options.outAnimation](options.animationTime, function(){
+                    $('#'+newID).remove();
+                    decrement();
+                });
+            }
+            $(this).on('click', remove);
+            setTimeout(remove, options.timeout);
+        });
+    };
+
+    return {
+        create : create,
+        increment: function(){count = count+1;},
+        decrement: function(){count = count-1;},
+        getCount: function(){return count;}
+        };
+};
+var LsGlobalNotifier = new NotifyFader();
+
+function notifyFader(text, classes, styles, customOptions) {
+
+    // Hide all modals
+    // TODO: Where is this needed?
+    // TODO: Commented, because doesn't work quick condition quick-add where modal should stay open
+    //$('.modal').modal('hide');
+
+    LsGlobalNotifier.create(text, classes, styles, customOptions);
+}
+
+/**
+ * Part of ajax helper
+ * @param {object} JSON object from server
+ * @return {boolean} true if the original success method should be run after this (always, except on failed login)
+ * @todo Localization
+ * @todo Branch on message type?
+ */
+LS.ajaxHelperOnSuccess = function(response) {
+    // Check type of response and take action accordingly
+    if (response == '') {
+        alert('No response from server');
+    }
+    else if (!response.loggedIn) {
+
+        // Hide any modals that might be open
+        $('.modal').modal('hide');
+
+        $('#ajax-helper-modal .modal-content').html(response.html);
+        $('#ajax-helper-modal').modal('show');
+        return false;
+    }
+    // No permission
+    else if (!response.hasPermission) {
+        notifyFader(response.noPermissionText, 'well-lg bg-danger text-center');
+    }
+    // Error popup
+    else if (response.error) {
+        notifyFader(response.error.message, 'well-lg bg-danger text-center');
+    }
+    // Success popup
+    else if (response.success) {
+        notifyFader(response.success, 'well-lg bg-primary text-center');
+    }
+    // Modal popup
+    else if (response.html) {
+        $('#ajax-helper-modal .modal-content').html(response.html);
+        $('#ajax-helper-modal').modal('show');
+    }
+
+    return true;
+}
+
+/**
+ * Like $.ajax, but with checks for errors,
+ * permission etc. Should be used together
+ * with the PHP AjaxHelper.
+ * @todo Handle error from server (500)?
+ * @param {object} options - Exactly the same as $.ajax options
+ * @return {object} ajax promise
+ */
+LS.ajax = function(options) {
+
+    var oldSuccess = options.success;
+    var oldError = options.error;
+    options.success = function(response) {
+
+        $('#ls-loading').hide();
+
+        // User-supplied success is always run EXCEPT when login fails
+        var runOldSuccess = LS.ajaxHelperOnSuccess(response);
+
+        if (oldSuccess && runOldSuccess) {
+            oldSuccess(response);
+        }
+    }
+
+    options.error = function(response) {
+        $('#ls-loading').hide();
+        if (oldError) {
+            oldError();
+        }
+    }
+
+    $('#ls-loading').show();
+
+    return $.ajax(options);
+}

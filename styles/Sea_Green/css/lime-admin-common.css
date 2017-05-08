@@ -5,6 +5,43 @@
  * It should not contain color definition (grey, blacks, and white are acceptable)
  */
 
+#ls-loading {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    position: fixed;
+    display: block;
+    opacity: 0.7;
+    background-color: #fff;
+    z-index: 3501;
+    text-align: center;
+    display: none;
+}
+
+/* The font-awesome spinner */
+#ls-loading-spinner {
+    position: absolute;
+    top: 30%;
+}
+
+#notif-container{
+  position: fixed;
+  top: 5%;
+  left: 20%;
+  width: 60%;
+  z-index: 3500;
+  background: rgba(255,255,255,0.1);
+}
+.bg-white{
+  background: #fff;
+}
+.row-button-margin-bottom {
+  margin-bottom: -5px;
+}
+.row-button-margin-bottom .btn{
+  margin-bottom: 5px;
+}
 
 .ui-datepicker {
   width: 17em;
@@ -157,6 +194,7 @@
   min-height: 100%;
   position: relative;
   margin-bottom: 65px;
+  padding: 0;
 }
 
 .side-body h3, .pagetitle, .list-surveys h3 {
@@ -386,7 +424,7 @@ html {
   .welcome .panel-body img {
     height: 4em;
     margin-bottom: 1em; }
-.welcome .login-pannel .panel-body img {
+.welcome .login-panel .panel-body img {
   margin-bottom: 0; }
 
 .alert {
@@ -417,7 +455,7 @@ html {
 @media screen and (min-width: 1280px) and (max-width: 1680px) {
   #profile-img {
     min-height: 0; } }
-.login-pannel {
+.login-panel {
   margin-top: 40px; }
 
 .login-content {
@@ -1286,7 +1324,6 @@ input[type="checkbox"]:disabled:checked:after,
 
 input[type="text"], input[type="password"], .ui-autocomplete-input, textarea, .uneditable-input {
   display: inline-block;
-  padding: 4px;
   font-size: 14px;
   line-height: 18px;
   border: 1px solid #ccc;
@@ -1335,9 +1372,6 @@ input:focus, textarea:focus {
   overflow: hidden;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12); }
 
-[aria-hidden=true] {
-  display: none;
-  visibility: hidden; }
 
 .modal-22 {
   position: absolute;
@@ -1520,7 +1554,7 @@ h3 .glyphicon-chevron-up, h3 .glyphicon-chevron-down, h3 .glyphicon-chevron-righ
 /**
  * comfortUpdate
  */
-#ajaxContainerLoading {
+#ajaxContainerLoading, .ajaxLoading {
   height: 130px;
   text-align: center;
   margin-top: 70px;
@@ -1928,11 +1962,414 @@ h3,.h3 {
     background-color: #f5f5f5;
 }
 
+
+#token-grid .table .filters > td .filter-container {
+    padding: 0px;
+}
+
 #token-grid table.table {
     width: none;
     max-width: none;
 }
 
-#token-grid table tbody tr td {
-    min-width: 100px;
+#token-grid table thead tr #action {
+    min-width: 150px;
+}
+
+#token-grid .filter-container{
+    min-width: 50px;
+}
+
+#token-grid table thead tr th {
+    /*white-space: nowrap;*/
+}
+
+#token-grid table tr.odd .blank_button
+{
+  /*For older Browsers with compatibilty issues*/
+    border-color: #f9f9f9;
+    background-color: #f9f9f9;
+  /*New CSS3 Style of doing it*/
+    border-color: rgba(0,0,0,0);
+    background-color: rgba(0,0,0,0);
+}
+
+#token-grid table tr .blank_button
+{
+    border-color: white;
+    background-color: white;
+}
+
+#token-grid table tr.selected .blank_button
+{
+
+    border-color: #eee; /* from yiistrap.css*/
+    background-color: #eee;
+}
+
+#token-grid .name {
+    min-width: 150px;
+}
+
+.scrolling-wrapper
+{
+    overflow-x: scroll;
+}
+
+#tokenListPager
+{
+    position: relative;
+}
+
+.blank_button span
+{
+    max-width: 12px;
+}
+
+#edittoken .tab-content #general .form-group .col-sm-4 .col-sm-4, #edittoken .tab-content #general .form-group .col-sm-4 .col-sm-8
+{
+    padding: 0;
+}
+
+div[id^="alertmod_"]
+{
+    display: none;
+}
+
+/* Can be removed when jqGrid is replaced */
+
+.ui-helper-clearfix {
+    min-height: 0;
+}
+.ui-dialog .ui-dialog-buttonpane {
+    background-image: none;
+    border-width: 1px 0 0;
+    margin-top: 0.5em;
+    padding: 0.3em 1em 0.5em 0.4em;
+    text-align: left;
+}
+.ui-helper-clearfix::before, .ui-helper-clearfix::after {
+    border-collapse: collapse;
+    content: "";
+    display: table;
+}
+.ui-helper-clearfix::after {
+    clear: both;
+}
+.ui-helper-clearfix::before, .ui-helper-clearfix::after {
+    border-collapse: collapse;
+    content: "";
+    display: table;
+}
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+    float: right;
+}
+.yiiLog{margin-bottom:70px}
+
+table#responsedetail tr td{
+    max-width: 100px;
+     word-wrap:break-word;
+}
+
+.in-title {
+    position: relative;
+    top: -65px;
+    right: 15px;
+}
+
+.notification-list {
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  float: left;
+  min-width: 160px;
+  padding: 5px 0;
+  margin: 2px 0 0;
+  list-style: none;
+  font-size: 14px;
+  border-radius: 4px;
+  background-clip: padding-box;
+  overflow-y: auto;
+}
+
+.notification-list > li > a {
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  line-height: 1.428571429;
+  white-space: nowrap;
+}
+.notification-list > li > a:hover,
+.notification-list > li > a:focus {
+  text-decoration: none;
+}
+.notification-list > .active > a,
+.notification-list > .active > a:hover,
+.notification-list > .active > a:focus {
+  text-decoration: none;
+  outline: 0;
+}
+.notification-list > .disabled > a,
+.notification-list > .disabled > a:hover,
+.notification-list > .disabled > a:focus {
+}
+.notification-list > .disabled > a:hover,
+.notification-list > .disabled > a:focus {
+  text-decoration: none;
+  background-color: transparent;
+  background-image: none;
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+  cursor: not-allowed;
+}
+#notification-outer-ul {
+    height: 400px;
+    width: 400px;
+}
+#notification-inner-ul {
+    height: 340px;
+    width: 390px;
+}
+/* Override fixed font in select2 CSS */
+.select2-container--bootstrap .select2-selection {
+   font-family: Roboto !important;
+}
+
+#responses-grid .table-condensed.upload-question {
+    margin-bottom: 0;
+    background-color: inherit;
+}
+
+.edit-participant-modal-body {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Condition builder */
+.scenario-heading {
+    padding: 0;
+}
+
+.scenario-heading .delete-scenario-form {
+    padding-top: 6px;
+}
+
+.condition-header-button {
+    margin-top: -10px;
+    margin-right: 10px;
+}
+
+/* Needed for buttons that are pulled right in the conditions bar */
+.margin-left {
+    margin-left: 5px;
+}
+
+.conditions-table {
+    margin-bottom: 0;
+}
+
+.condition-and-or-or {
+    margin-left: 20px;
+}
+
+/* Tabs used within form in condition designer */
+#editconditions .tab-content, #quick-add-conditions-form .tab-content {
+    padding-top: 0;
+}
+
+#quick-add-condition-modal .modal-dialog {
+    width: 800px;
+}
+
+#login-panel {
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto
+}
+
+/*
+ * Row with equal height columns
+ * --------------------------------------------------
+ */
+.row-eq-height {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display:         flex;
+  margin-bottom: 30px;
+}
+
+.welcome .panel {
+    height: 110%;
+    min-width: 200px;
+}
+
+.welcome .panel-body {
+    padding: 0px;
+}
+
+.welcome .panel-heading {
+    height: 25%;
+    display:flex;
+     align-items: center;
+     justify-content: center;
+}
+
+.welcome .panel-body {
+    height: 75%;
+    width: 100%;
+}
+
+.welcome .panel-body .panel-body-ico, .welcome .panel-body .panel-body-link {
+    width: 100%;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.welcome .panel-body .panel-body-ico{
+    height: 70%;
+}
+
+.welcome .panel-body .panel-body-link {
+    height: 30%;
+}
+
+input[type="file"].form-control {
+    border: none;
+    padding-left: 0px;
+}
+
+#insertmethod-container{
+    display: none;
+}
+
+
+/* To make Statistics printable really easy */
+
+@page {
+  size: A4 portrait;
+  margin-left: 0.8cm;
+  margin-right: 0.8cm;
+  margin-top: 1.4cm;
+  margin-bottom: 1.8cm;
+}
+
+@media print{
+
+  html,body {
+    margin: 0;
+    max-width: 90%;
+  }
+  body{
+    text-align: left;
+    padding: 12px;
+    overflow: visible;
+    position: absolute;
+    top: 24px;
+    left: 14px;
+  }
+  
+  body.onStatistics a:not(.printable),
+  body.onStatistics p:not(.printable),
+  body.onStatistics button:not(.printable),
+  body.onStatistics nav:not(.printable),
+  body.onStatistics form:not(.printable),
+  body.onStatistics footer:not(.printable),
+  body.onStatistics h1:not(.printable),
+  body.onStatistics h2:not(.printable),
+  body.onStatistics h3:not(.printable),
+  body.onStatistics h4:not(.printable),
+  body.onStatistics h5:not(.printable), 
+  body.onStatistics .jumbotron,
+  body.onStatistics .menubar,
+  body.onStatistics>div:not(#in_survey_common),
+  body.onStatistics>div#in_survey_common>div>div:not(#statisticsview)
+  {
+    display: none !important;
+    visibility: none !important;
+    overflow: hidden !important;
+    padding: 0;
+    position: absolute;
+    left: 0;
+    margin: 0 !important;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  body.onStatistics div:not(.printable) {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+
+  /*body.onStatistics td:not(.printable),
+  body.onStatistics th:not(.printable),*/
+  /*body.onStatistics table:not(.printable),*/
+
+  body.onStatistics a.printable,
+  body.onStatistics p.printable,
+  body.onStatistics div.printable,
+  body.onStatistics div.printable table,
+  body.onStatistics table.printable,
+  body.onStatistics h1.printable,
+  body.onStatistics h2.printable,
+  body.onStatistics h3.printable,
+  body.onStatistics h4.printable,
+  body.onStatistics h5.printable{
+    width: 95% !important;
+    max-width: 100%;
+    float: none;
+    margin: auto;
+    padding-left: 0 !important;
+  }
+
+  body.onStatistics div.printable{
+    page-break-after  : always;
+    page-break-before : avoid;
+    page-break-inside : avoid;
+    display: block;
+  }
+  body.onStatistics table.printable{
+    page-break-after  : always;
+    page-break-before : avoid;
+    page-break-inside : avoid;
+  }
+
+  body.onStatistics div.printable table.printable{
+    page-break-after  : avoid ;
+    page-break-before : avoid;
+  }
+
+  body.onStatistics table.printable thead,
+  body.onStatistics table.printable tbody,
+  body.onStatistics table.printable tr{
+    width: 100% !important; 
+    margin:0;
+  }
+
+  body.onStatistics table.printable canvas{
+    page-break-after  : avoid;
+    page-break-before : avoid;
+    page-break-inside : avoid;
+  }
+
+  body.onStatistics .side-body{
+    max-width: 100%;
+    margin: 0 !important;
+  }
+  body.onStatistics .side-menu{
+    display: none !important;
+    visibility: none !important;
+    overflow: hidden !important;
+    padding: 0;
+    margin: 0;
+  }
+  body.onStatistics .absolute-wrapper{
+    display: none !important;
+    visibility: none !important;
+    overflow: hidden !important;
+    padding: 0;
+    margin: 0;
+  }
 }

@@ -51,7 +51,7 @@ if (isset($alt))
          This field is related to the input thanks to attribute aria-labelledby
     -->
     <div class="label-text label-clickable" id="label-answer319974X233X4277A1">
-        One
+        <?php eT('One'); ?>
     </div>
 </div>
 <!-- end of answer_row -->
@@ -75,7 +75,7 @@ if (isset($alt))
          This field is related to the input thanks to attribute aria-labelledby
     -->
     <div class="label-text label-clickable" id="label-answer319974X233X4277A2">
-        Two
+        <?php eT('Two'); ?>
     </div>
 </div>
 <!-- end of answer_row -->
@@ -99,7 +99,7 @@ if (isset($alt))
          This field is related to the input thanks to attribute aria-labelledby
     -->
     <div class="label-text label-clickable" id="label-answer319974X233X4277A3">
-        Three
+        <?php eT('Three'); ?>
     </div>
 </div>
 <!-- end of answer_row -->
@@ -149,19 +149,19 @@ if (isset($alt))
     class="radio"
     type="radio"
     name="319974X233X4277"
-    id="answer319974X233X4277NANS"
+    id="answer319974X233X4277"
     value=""
      checked="checked"    onclick="if (document.getElementById('answer319974X233X4277othertext') != null) document.getElementById('answer319974X233X4277othertext').value='';checkconditions(this.value, this.name, this.type)"
-    aria-labelledby="label-answer319974X233X4277NANS"
+    aria-labelledby="label-answer319974X233X4277"
     />
-    <label for="answer319974X233X4277NANS" class="answertext control-label label-radio"></label>
+    <label for="answer319974X233X4277" class="answertext control-label label-radio"></label>
 
     <!--
          The label text is provided inside a div,
          so final user can add paragraph, div, or whatever he wants in the subquestion text
          This field is related to the input thanks to attribute aria-labelledby
     -->
-    <div class="label-text label-clickable" id="label-answer319974X233X4277NANS">
+    <div class="label-text label-clickable" id="label-answer319974X233X4277">
         <?php eT("No answer");?>
     </div>
 </div>

@@ -13,6 +13,9 @@
 */
 
 
+/**
+ * @param string $file
+ */
 function doreplacement($file,$data, $oTemplate='')
 {
     //Produce sample page from template file
@@ -39,13 +42,13 @@ function getListOfFiles($wh){
 }
 
 /**
- * Load this editfile
- *
- * @param string $templatename
- * @param string $templatefile
- * @param array $templates
- * @return string
- */
+* Load this editfile
+*
+* @param string $templatename
+* @param string $templatefile
+* @param array $templates
+* @return string
+*/
 function filetext($templatename,$templatefile,$templates) {
     $sFileName = gettemplatefilename($templates[$templatename],$templatefile);
     if (file_exists($sFileName))
@@ -57,6 +60,9 @@ function filetext($templatename,$templatefile,$templates) {
     }
 }
 
+/**
+ * @param string $target
+ */
 function mkdir_p($target){
     //creates a new directory
     //Returns 1 for success
@@ -75,31 +81,6 @@ function mkdir_p($target){
     } else {
         return 0;
     }
-}
-
-function makeoptions($array, $value, $text, $selectedvalue) {
-    $return='';
-    foreach ($array as $ar) {
-        $return .= "<option value='".HTMLEscape($ar[$value])."'";
-        if (HTMLEscape($ar[$value]) == $selectedvalue) {
-            $return .= " selected='selected'";
-        }
-        $return .= '>'.$ar[$text]."</option>\n";
-    }
-    return $return;
-}
-
-/**
- * Index is the file index in the Template configuration file
- */
-function makeoptionswithindex($array, $prefix)
-{
-    $return=array();
-    foreach ($array as $index => $ar)
-    {
-        $return[$prefix.'_'.$index]=$ar['name'];
-    }
-    return $return;
 }
 
 function templateoptions($optionarray, $selectedvalue) {
@@ -165,6 +146,7 @@ function templateExtractFilter($p_event, &$p_header)
     $info = pathinfo($p_header['filename']);
     // Deny files with multiple extensions in general
     if (substr_count($info['basename'],'.')!=1) return 0;
+
     if ($p_header['folder'] || !isset($info['extension']) || in_array($info['extension'],$aAllowExtensions)) {
         return 1;
     }
@@ -174,12 +156,12 @@ function templateExtractFilter($p_event, &$p_header)
 }
 
 /**
- * Determine the storage path for a file
- * TODO: remove all that logic.
- *
- * @param string $template
- * @param string $templatefile
- */
+* Determine the storage path for a file
+* TODO: remove all that logic.
+*
+* @param string $template
+* @param string $templatefile
+*/
 function gettemplatefilename($template, $templatefile) {
     switch (pathinfo($templatefile, PATHINFO_EXTENSION))
     {
@@ -197,7 +179,7 @@ function gettemplatefilename($template, $templatefile) {
             // Something else
             else
             {
-                $oEditedTemplate = Template::model()->getTemplateConfiguration($templatename);
+                $oEditedTemplate = Template::model()->getTemplateConfiguration($template);
                 return $template.'/'.$oEditedTemplate->viewPath.'/'.$templatefile;
             }
             break;

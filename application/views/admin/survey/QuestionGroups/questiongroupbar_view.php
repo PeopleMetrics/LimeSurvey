@@ -36,7 +36,7 @@
                     </ul>
                 </div>
             <?php else: ?>
-                <a class="btn btn-default  btntooltip" href="<?php echo $this->createUrl("survey/index/sid/$surveyid/newtest/Y/lang/$oSurvey->language"); ?>" role="button"  accesskey='d' target='_blank'>
+                <a class="btn btn-default  btntooltip" href="<?php echo $this->createUrl("survey/index",array('sid'=>$surveyid,'newtest'=>"Y",'lang'=>$oSurvey->language)); ?>" role="button"  accesskey='d' target='_blank'>
                     <span class="icon-do" ></span>
                     <?php if($oSurvey->active=='N'):?>
                         <?php eT('Preview survey');?>
@@ -117,7 +117,7 @@
                         <?php else: ?>
 
                             <!-- there is at least one question having a condition on its content -->
-                            <a href='<?php echo $this->createUrl("admin/survey/sa/view/surveyid/$surveyid/gid/$gid"); ?>'  class="btn btn-default" onclick="alert('<?php eT("Impossible to delete this group because there is at least one question having a condition on its content","js"); ?>'); return false;">
+                            <a href='<?php echo $this->createUrl("admin/questiongroups/sa/view/surveyid/$surveyid/gid/$gid"); ?>'  class="btn btn-default" onclick="alert('<?php eT("Impossible to delete this group because there is at least one question having a condition on its content","js"); ?>'); return false;">
                                 <span class="glyphicon glyphicon-trash"></span>
                                 <?php eT("Delete current question group"); ?>
                             </a>

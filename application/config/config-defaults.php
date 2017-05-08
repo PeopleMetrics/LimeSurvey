@@ -82,7 +82,7 @@ $config['allowunblacklist']     =  'N';             // Allow participant to unbl
 $config['userideditable']     =  'N';               // Allow editing of user IDs
 $config['defaulttemplate']    =  'default';         // This setting specifys the default theme used for the 'public list' of surveys
 
-$config['allowedtemplateuploads'] = 'gif,ico,jpg,png,css,js,map,json,eot,svg,ttf,woff,txt,md';  // File types allowed to be uploaded in the templates section.
+$config['allowedtemplateuploads'] = 'gif,ico,jpg,png,css,js,map,json,eot,svg,ttf,woff,txt,md,xml,woff2';  // File types allowed to be uploaded in the templates section.
 
 $config['allowedresourcesuploads'] = '7z,aiff,asf,avi,bmp,csv,doc,docx,fla,flv,gif,gz,gzip,ico,jpeg,jpg,mid,mov,mp3,mp4,mpc,mpeg,mpg,ods,odt,pdf,png,ppt,pxd,qt,ram,rar,rm,rmi,rmvb,rtf,sdc,sitd,swf,sxc,sxw,tar,tgz,tif,tiff,txt,vsd,wav,wma,wmv,xls,xlsx,xml,zip,pstpl,css,js';   // File types allowed to be uploaded in the resources sections, and with the HTML Editor
 
@@ -389,7 +389,7 @@ $config['bPdfQuestionBold'] = '0';		  // Questions in bold (1) or normal (0)
 $config['bPdfQuestionBorder'] = '1'; 	  // Border in questions. Accepts 0:no border, 1:border
 $config['bPdfResponseBorder'] = '1';	  // Border in responses. Accepts 0:no border, 1:border
 
-// QueXML-PDF: If set to true, the printable_help attribute will be visible on the exported PDF questionnaires
+// QueXML-PDF: If set to true, the printable_help attribute will be visible on the exported PDF survey
 // If used, the appearance (font size, justification, etc.) may be adjusted by editing td.questionHelpBefore and $helpBeforeBorderBottom of quexml.
 $config['quexmlshowprintablehelp'] = false;
 
@@ -505,6 +505,15 @@ $config['force_ssl'] = 'neither'; // DO not turn on unless you are sure your ser
 */
 $config['ssl_emergency_override'] = false;
 
+/**
+* Sets if any part of LimeSUrvey may be embedded in an iframe
+* Valid values are allow, sameorigin
+* Default: allow
+* Recommended: sameorigin
+* Using 'deny' is currently not supported as it will disable the template editor preview and probably file upload.
+*/
+$config['x_frame_options'] = 'allow';
+
 
 // Get your IP Info DB key from http://ipinfodb.com/
 // If you have the API key, you can use it to get the approximate location of the user initially.
@@ -574,13 +583,6 @@ $config['iSessionExpirationTime'] = 7200;
 */
 $config['InsertansUnsupportedtypes'] = array();
 
-/**
-* This parameter sets if and what update notifications are shown to the administrator. Valid values are 'never', 'stable', 'both' (for stable and unstable)
-* Default is 'stable'
-* @var string
-*/
-$config['updatenotification'] = 'both';
-
 // Proxy settings for ComfortUpdate
 /**
 * Set these if you are behind a proxy and want to update LS using ComfortUpdate
@@ -604,7 +606,7 @@ $config['proxy_host_port'] = 80;
 //The following url and dir locations do not need to be modified unless you have a non-standard
 //LimeSurvey installation. Do not change unless you know what you are doing.
 
-if(!isset($argv[0]))
+if(!isset($argv[0]) && Yii::app()!=null)
 {
     $config['publicurl'] = Yii::app()->baseUrl . '/';                          // The public website location (url) of the public survey script
 }
@@ -659,6 +661,7 @@ $config['bNumRealValue']             = 0;
 // Home page default Settings
 $config['show_logo'] = 'show';
 $config['show_last_survey_and_question'] = 'show';
+$config['show_survey_list_search'] = 'show';
 $config['boxes_by_row'] = '3';
 $config['boxes_offset'] = '3';
 
@@ -672,10 +675,13 @@ $config['bounceaccountuser']='';
 $config['defaultquestionselectormode']='default';
 
 // Template editor mode
-$config['defaulttmplateeditormode']='default';
+$config['defaulttemplateeditormode']='default';
 
 // Side Menu behaviout
 $config['sideMenuBehaviour']='adaptive';
+
+// Hide update key
+$config['hide_update_key']=false;
 
 return $config;
 //settings deleted

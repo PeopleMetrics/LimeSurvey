@@ -28,7 +28,7 @@
 
                             <div class="col-sm-6">
                                 <!-- Data Selection -->
-                                <?php $this->renderPartial('/admin/export/statistics_subviews/_dataselection', array('selectshow'=>$selectshow, 'selecthide'=>$selecthide, 'selectinc'=>$selectinc, 'survlangs'=>$survlangs, 'sStatisticsLanguage'=>$sStatisticsLanguage)) ; ?>
+                                <?php $this->renderPartial('/admin/export/statistics_subviews/_dataselection', array('selectshow'=>$selectshow, 'selecthide'=>$selecthide, 'selectinc'=>$selectinc, 'survlangs'=>$survlangs, 'sStatisticsLanguage'=>$sStatisticsLanguage, 'surveyinfo'=>$surveyinfo)) ; ?>
                                 <!-- Response ID -->
                                 <?php $this->renderPartial('/admin/export/statistics_subviews/_responseid', array()) ; ?>
                                 <!-- Output format -->
@@ -115,7 +115,9 @@
                     <div class="alert alert-info" role="alert" id="view-stats-alert-info">
                         <?php eT('Please select filters and click on the "View statistics" button to generate the statistics.');?>
                     </div>
-
+                <?php else:?>
+                    <?php echo $output; ?>
+                <?php endif;?>
                     <div id="statsContainerLoading" >
                         <p><?php eT('Please wait, loading data...');?></p>
                         <div class="preloader loading">
@@ -127,10 +129,6 @@
                             <span class="slice"></span>
                         </div>
                     </div>
-
-                <?php else:?>
-                    <?php echo $output; ?>
-                <?php endif;?>
             </div>
         </div>
     </div>

@@ -42,7 +42,7 @@
         $oAdminTheme = AdminTheme::getInstance();
         $oAdminTheme->registerStylesAndScripts();
     ?>
-    <?php if(!YII_DEBUG): ?>
+    <?php if(!YII_DEBUG ||  Yii::app()->getConfig('use_asset_manager')): ?>
         <!-- Debug mode is off, so the asset manager will be used-->
     <?php else: ?>
         <!-- Debug mode is on, so the asset manager will not be used -->
@@ -57,6 +57,12 @@
     <?php $this->widget('ext.LimeDebug.LimeDebug'); ?>
 </head>
 <body>
+
+<!-- Loading wrapper -->
+<div id='ls-loading'>
+    <span id='ls-loading-spinner' class='fa fa-spinner fa-spin fa-4x'></span>
+</div>
+
 <?php $this->widget('ext.FlashMessage.FlashMessage'); ?>
 
 <script type='text/javascript'>

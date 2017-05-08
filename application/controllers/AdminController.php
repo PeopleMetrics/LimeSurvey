@@ -30,6 +30,7 @@ class AdminController extends LSYii_Controller
         $this->_sessioncontrol();
 
         $this->user_id = Yii::app()->user->getId();
+
         if (!Yii::app()->getConfig("surveyid")) {Yii::app()->setConfig("surveyid", returnGlobal('sid'));}         //SurveyID
         if (!Yii::app()->getConfig("ugid")) {Yii::app()->setConfig("ugid", returnGlobal('ugid'));}                //Usergroup-ID
         if (!Yii::app()->getConfig("gid")) {Yii::app()->setConfig("gid", returnGlobal('gid'));}                   //GroupID
@@ -40,10 +41,11 @@ class AdminController extends LSYii_Controller
         if (!Yii::app()->getConfig("subaction")) {Yii::app()->setConfig("subaction", returnGlobal('subaction'));} //Desired subaction
         if (!Yii::app()->getConfig("editedaction")) {Yii::app()->setConfig("editedaction", returnGlobal('editedaction'));} // for html editor integration
 
-        // Variable not used, but keep it here so the object is initialized at the right place.
-        $oTemplate = Template::model()->getInstance(Yii::app()->getConfig("defaulttemplate"));
+        // This line is needed for template editor to work
         $oAdminTheme = AdminTheme::getInstance();
-        $oAdminTheme->registerScriptFile( 'ADMIN_SCRIPT_PATH', 'admin_core.js' );
+
+        AdminTheme::staticRegisterScriptFile('ADMIN_SCRIPT_PATH', 'admin_core.js' );
+        AdminTheme::staticRegisterScriptFile('ADMIN_SCRIPT_PATH', 'notifications.js' );
     }
 
     /**
@@ -87,7 +89,7 @@ class AdminController extends LSYii_Controller
 
         $this->_getAdminFooter('http://manual.limesurvey.org', gT('LimeSurvey online manual'));
 
-        die;
+        Yii::app()->end();
     }
     /**
     * Load and set session vars
@@ -132,9 +134,16 @@ class AdminController extends LSYii_Controller
         if (Yii::app()->db->schema->getTable('{{surveys}}') )
         {
             $sDBVersion = getGlobalSetting('DBVersion');
-            if ((int) $sDBVersion < Yii::app()->getConfig('dbversionnumber') && $action != 'databaseupdate')
-                $this->redirect(array('/admin/databaseupdate/sa/db'));
         }
+        if ((int) $sDBVersion < Yii::app()->getConfig('dbversionnumber') && $action != 'databaseupdate')
+        {
+            // Try a silent update first
+            Yii::app()->loadHelper('update/updatedb');
+            if (!db_upgrade_all(intval($sDBVersion),true)){
+                $this->redirect(array('/admin/databaseupdate/sa/db'));
+            }
+        }
+
 
         if ($action != "databaseupdate" && $action != "db")
             if (empty($this->user_id) && $action != "authentication"  && $action != "remotecontrol")
@@ -143,6 +152,14 @@ class AdminController extends LSYii_Controller
                     Yii::app()->session['redirect_after_login'] = $this->createUrl('/');
 
                 App()->user->setReturnUrl(App()->request->requestUri);
+
+                // If this is an ajax call, don't redirect, but echo login modal instead
+                $isAjax = isset($_GET['ajax']) && $_GET['ajax'];
+                if ($isAjax && Yii::app()->user->getIsGuest()) {
+                    Yii::import('application.helpers.admin.ajax_helper', true);
+                    ls\ajax\AjaxHelper::outputNotLoggedIn();
+                    return;
+                }
 
                 $this->redirect(array('/admin/authentication/sa/login'));
             }
@@ -217,7 +234,8 @@ class AdminController extends LSYii_Controller
         'tokens'           => 'tokens',
         'translate'        => 'translate',
         'update'           => 'update',
-        'pluginhelper'     => 'PluginHelper'
+        'pluginhelper'     => 'PluginHelper',
+        'notification'     => 'NotificationController'
         );
     }
 
@@ -303,7 +321,6 @@ class AdminController extends LSYii_Controller
                 //$filename = str_replace('.css', '-rtl.css', $filename);
             //}
 
-        //echo '<pre>'; var_dump($aData); echo '</pre>';die;
         $sOutput = $this->renderPartial("/admin/super/header", $aData, true);
 
         if ($return)
@@ -331,7 +348,7 @@ class AdminController extends LSYii_Controller
 
         $aData['buildtext'] = "";
         if(Yii::app()->getConfig("buildnumber")!="") {
-            $aData['buildtext']= "Build ".Yii::app()->getConfig("buildnumber");
+            $aData['buildtext']= "+".Yii::app()->getConfig("buildnumber");
         }
 
         //If user is not logged in, don't print the version number information in the footer.

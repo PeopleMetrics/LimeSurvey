@@ -21,23 +21,48 @@
  * @var $slider_max
  * @var $slider_step
  * @var $slider_default
+ * @var $slider_middlestart
  * @var $slider_orientation
  * @var $slider_handle
  * @var $slider_reset
  * @var $sSeparator
+ * @var $slider_debug
  */
+
+//the complicated default slider setting will be simplified header_remove
+//Three cases:
+//  1: posted value safed
+//  2: default value set 
+//  3: slider starts in middle position
+
+$sliderStart = 'null';
+if($dispVal) //posted value => higest priority
+{
+    $sliderStart = $dispVal;
+} 
+else if($slider_default) //
+{
+    $sliderStart = $slider_default;
+}
+else if($slider_middlestart==1) //
+{
+    $sliderStart = intval(($slider_max + $slider_min)/2);
+}
+
 ?>
 
 <div  id='javatbd<?php echo $myfname; ?>' class="question-item answer-item numeric-item  text-item <?php echo $extraclass;?> col-sm-12" <?php echo $sDisplayStyle;?>>
-    <?php if($alert):?>
-        <div class="label label-danger errormandatory"  role="alert">
-            <?php echo $labelText;?>
-        </div> <!-- alert -->
-    <?php endif;?>
+
     <div class="form-group row">
-        <label class='control-label col-xs-12 numeric-label' for="answer<?php echo $myfname; ?>">
-            <?php echo $labelText;?>
-        </label>
+        <?php if($alert):?>
+            <div class="label label-danger errormandatory"  role="alert">
+                <?php echo $labelText;?>
+            </div> <!-- alert -->
+        <?php else:?>
+            <label class='control-label col-xs-12 numeric-label' for="answer<?php echo $myfname; ?>">
+                <?php echo $labelText;?>
+            </label>
+        <?php endif;?>
         <div>
 
         <div class='slider-container row'>
@@ -57,12 +82,11 @@
                             <input
                                 class="text form-control pull-left <?php echo $kpclass;?>"
                                 type="text"
-                                name="<?php echo $myfname;?>"
-                                id="answer<?php echo $myfname; ?>"
-                                value="<?php echo $dispVal;?>"
-                                onkeyup="<?php echo $checkconditionFunction; ?>"
+                                name="slider_<?php echo $myfname;?>"
+                                id="slider_answer<?php echo $myfname; ?>"
+                                value="<?php echo $sliderStart; ?>"
                                 <?php echo $maxlength; ?>
-                                data-slider-value="<?php echo $sUnformatedValue;?>"
+                                data-slider-value="<?php echo $sliderStart; ?>"
                                 data-slider-min='<?php echo $slider_min;?>'
                                 data-slider-max='<?php echo $slider_max;?>'
                                 data-slider-step='<?php echo $slider_step;?>'
@@ -76,13 +100,13 @@
                             />
 
                             <?php if($slider_showminmax): ?>
-                                <div class='pull-left slider-min-badge'>
+                                <div class='pull-<?php if (getLanguageRTL(App()->language)): echo 'right'; else: echo 'left'; endif; ?> '>
                                     <span class='help-block'><?php echo $slider_min; ?></span>
                                 </div>
                             <?php endif; ?>
 
                             <?php if($slider_showminmax): ?>
-                                <div class='pull-right'>
+                                <div class='pull-<?php if (getLanguageRTL(App()->language)): echo 'left'; else: echo 'right'; endif; ?> '>
                                     <span class='help-block'><?php echo $slider_max; ?></span>
                                 </div>
                             <?php endif; ?>
@@ -105,7 +129,7 @@
 
 
         </div>
-        <input type="hidden" name="slider_user_no_action_<?php echo $myfname; ?>" id="slider_user_no_action_<?php echo $myfname; ?>" value="<?php echo $slider_user_no_action?>" />
+        <input type="hidden" name="<?php echo $myfname;?>" onchange="<?php echo $checkconditionFunction; ?>" id="answer<?php echo $myfname; ?>"  value="<?php echo ($dispVal ? $dispVal : null);?>" />
     </div> <!-- form group -->
 </div>
 
@@ -129,7 +153,6 @@
     </style>
     </div>
     <script type='text/javascript'>
-        <!--
             // Most of this javascript is here to handle the fact that bootstrapSlider need numerical value in the input
             // It can't accept "NULL" nor anyother thousand separator than "." (else it become a string)
             // See : https://github.com/LimeSurvey/LimeSurvey/blob/master/scripts/bootstrap-slider.js#l1453-l1461
@@ -137,18 +160,22 @@
             $(document).ready(function(){
                 // Set of the needed informations for the slider
                 var myfname = '<?php echo $myfname; ?>';
-                var $inputEl = $('#answer' + myfname);
-                var $sliderNoActionEl = $('#slider_user_no_action_' + myfname);
+                var $inputEl = $('#slider_answer' + myfname);
+                var $resultEl = $('#answer' + myfname);
                 var $prefix = $inputEl.data('slider-prefix');
                 var $suffix = $inputEl.data('slider-suffix');
                 var $separator = $inputEl.data('separator');
-
+                var regExpTest = new RegExp(/^-?[0-9]+(.|,)?[0-9]*$/);
                 // We start the slider, and provide it the formated value with prefix and suffix for its tooltip
                 // Use closure for namespace, so we can use theSlider variable for all sliders.
                 (function () {
                     var theSlider = $inputEl.bootstrapSlider({
+                        value : <?php echo $sliderStart; ?>,
                         formatter: function (value) {
-                            displayValue = value.toString().replace('.',$separator);
+                            var displayValue = "";
+                            if(regExpTest.test(value.toString())){
+                                displayValue = value.toString().replace(/\./,$separator);
+                            }
                             return $prefix + displayValue + $suffix;
                         },
                     });
@@ -158,40 +185,33 @@
                     // and to update the value of the input element with correct format
                     theSlider.on('slideStart', function(){
                         $('#javatbd' + myfname).find('div.tooltip').show(); // Show the tooltip
-                        $sliderNoActionEl.val(0); // The user did an action
                         value = $inputEl.val(); // We get the current value of the bootstrapSlider
+                        //console.log('value', value);
                         displayValue = value.toString().replace('.',$separator); // We format it with the right separator
-                        $inputEl.val(displayValue); // We parse it to the element
+                        $resultEl.val(displayValue).trigger('change'); // We parse it to the element
                     });
 
                     theSlider.on('slideStop', function() {
+                        value = $inputEl.val(); // We get the current value of the bootstrapSlider
+                        //console.log('value', value);
+                        displayValue = value.toString().replace('.',$separator); // We format it with the right separator
                         $inputEl.trigger('onkeyup');
-                        LEMrel<?php echo $qid; ?>() // We call the EM
+                        $resultEl.val(displayValue).trigger('change');
+                        //LEMrel<?php echo $qid; ?>() // We call the EM
+                        //console.log('$resultEl: ', $resultEl.val());
                     });
-
-                    // If user no action is on, we hide the tooltip
-                    // And we set the value to null
-                    if($sliderNoActionEl.val()=="1")
-                    {
-                        $('#javatbd' + myfname).find('div.tooltip').hide();
-                        $inputEl.attr('value', '');
-                    }
 
                     // Click the reset button
                     $('#answer' + '<?php echo $myfname; ?>' + '_resetslider').on('click', function() {
                         $('#javatbd' + myfname).find('div.tooltip').hide();
 
-                        // Pretend user didn't do anything
-                        $sliderNoActionEl.val("1");
-
                         // Position slider button at beginning
-                        theSlider.bootstrapSlider('setValue', parseFloat($inputEl.attr('data-slider-min')));
+                        theSlider.bootstrapSlider('setValue', null);
 
                         // Set value to null
-                        $inputEl.attr('value', '');
-
-                        // Why the fuck not?
-                        LEMrel<?php echo $qid; ?>() // We call the EM
+                        $inputEl.attr('value', '').trigger("keyup");
+                        $resultEl.val('').trigger('change');
+                        //LEMrel<?php echo $qid; ?>() // We call the EM
                     });
 
                     // On form submission, if user action is still on,
@@ -200,23 +220,11 @@
                     $("form").submit(function (e) {
                         $('#javatbd<?php echo $myfname; ?> slider').hide(),
                         $inputEl.bootstrapSlider('destroy');
-
-                        // This problem still afect 2.06
-                        value = $inputEl.val(); // We get the current value of the bootstrapSlider
-                        displayValue = value.toString().replace('.',$separator); // We format it with the right separator
-                        $inputEl.val(displayValue); // We parse it to the element
-
-
-                        if($sliderNoActionEl.val()=="1")
-                        {
-                            $inputEl.val('');
-                        }
                         return true;
                     });
                     $("#vmsg_<?php echo $qid;?>_default").text('<?php eT('Please click and drag the slider handles to enter your answer.');?>');
                 })();
             });
-        -->
     </script>
 <?php endif; ?>
 <!-- end of answer_row -->

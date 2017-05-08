@@ -42,10 +42,8 @@
                 <ul class="nav nav-tabs">
                     <?php foreach ($anslangs as $i => $anslang):?>
                         <li role="presentation" <?php if($i==0){echo 'class="active"';}?>>
-                            <a data-toggle="tab" href='#tabpage_<?php echo $anslang; ?>'><?php echo getLanguageNameFromCode($anslang, false); ?>
-                                <?php if ($anslang==Survey::model()->findByPk($surveyid)->language):?>
-                                    (<?php echo gT("Base language"); ?>)
-                                <?php endif;?>
+                            <a data-toggle="tab" href='#tabpage_<?php echo $anslang; ?>'>
+                                <?php echo getLanguageNameFromCode($anslang, false).($anslang==Survey::model()->findByPk($surveyid)->language ? ' ('.gT("Base language").')':''); ?>
                             </a>
                         </li>
                     <?php endforeach;?>
@@ -181,6 +179,7 @@
                                                     'assessment_value'  => $row->assessment_value,
                                                     'sortorder'         => $row->sortorder,
                                                     'answer'            => $row->answer,
+                                                    'oldCode'   => true,
                                                 ));?>
 
                                             <?php endif; ?>
@@ -208,7 +207,7 @@
                                         <?php eT('Predefined label sets...'); ?>
                                     </button>
 
-                                    <button <?php echo $disabled; ?>  id='btnquickadd_<?php echo $anslang; ?>_<?php echo $scale_id; ?>' class='btn btn-default' type='button'  data-toggle="modal" data-target="#quickaddModal" data-scale-id="<?php echo $scale_id; ?>">
+                                    <button <?php echo $disabled; ?>  id='btnquickadd_<?php echo $anslang; ?>_<?php echo $scale_id; ?>' data-scale-id="<?php echo $scale_id; ?>" class='btn btn-default btnquickadd' type='button'  data-toggle="modal" data-target="#quickaddModal" data-scale-id="<?php echo $scale_id; ?>">
                                         <?php eT('Quick add...'); ?>
                                     </button>
 
@@ -237,10 +236,13 @@
                             type="hidden"
                             id="add-input-javascript-datas"
                             data-url="<?php echo App()->createUrl('/admin/questions/sa/getSubquestionRowForAllLanguages/');?>"
+                            data-quickurl="<?php echo App()->createUrl('/admin/questions/sa/getSubquestionRowQuickAdd/');?>"
+                            data-assessmentvisible="<?php echo (isset($assessmentvisible) && $assessmentvisible==true ? "1" : "0"); ?>"
                             data-errormessage="An error occured while processing the ajax request."
                             data-surveyid="<?php echo $surveyid;?>"
                             data-gid="<?php echo $gid;?>"
                             data-qid="<?php echo $qid;?>"
+                            data-scale-id="<?php echo $scale_id-1; // -1 : because it's incremented via <  ?>"
                         />
                     </p>
 
